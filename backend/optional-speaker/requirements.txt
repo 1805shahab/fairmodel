@@ -1,0 +1,4 @@
+# Install ONLY into a separate optional environment. Never part of the core install.
+speechbrain>=1.1,<2
+torch>=2.5,<3
+torchaudio>=2.5,<3
