@@ -46,3 +46,5 @@ Open http://localhost:3000. Full setup and validation commands are in README.md.
 ## GitHub source publication
 
 The owner explicitly requested creating a GitHub repository and pushing this project. Target: private `1805shahab/fairmodel`, branch `main`. Include source, documentation, dependency lock files, and sanitized environment examples. Exclude actual environment files, uploaded/generated media, databases, virtual environments, build outputs, logs, browser artifacts, and portable local tools. This authorization does not include deployment or the deferred PayPal integration.
+
+- [x] Created https://github.com/1805shahab/fairmodel as a private repository and pushed the audited initial source commit (`2b18781`) to `main`. Verified GitHub privacy and an exact match between local and remote commit IDs. The environment example was sanitized before the first commit; actual credentials and private runtime artifacts were excluded.

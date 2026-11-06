@@ -2,6 +2,8 @@
 
 **Every voice deserves a fair share.** AI voice licensing, explainable compliance, and artist-approved royalties.
 
+Source repository: [1805shahab/fairmodel](https://github.com/1805shahab/fairmodel) (private).
+
 Local full-stack hackathon application: Next.js App Router/React/TypeScript/Tailwind, FastAPI/Python 3.12, SQLAlchemy/SQLite, Gemini (`google-genai`), Groq Whisper, FFmpeg/ffprobe, WebRTC VAD, and AG Grid Community.
 
 **Payments are simulated. No PayPal authentication or API calls are implemented or attempted.** Real PayPal Sandbox integration remains a required final hackathon milestone, deferred until account access is restored and the owner explicitly authorizes it.
