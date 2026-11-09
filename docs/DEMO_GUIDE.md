@@ -6,6 +6,12 @@ Start both servers using README's PowerShell commands. Generate local fixtures w
 
 For a live AI judging run, configure Gemini and Groq on the backend before starting. Leave all fixture checkboxes unchecked. A live demo is not verified until both providers actually complete requests. Keep a separate clearly disclosed fixture run available for quota/network problems. Never claim a fixture result is Gemini/Groq.
 
+## Interactive control room preview
+
+Open `/control-room` for a separate, client-only cinematic product preview. Its fictional sample artist, contract clauses, generated events, voice-match display, earnings, invoices, and payouts are local mock data; they are not derived from uploads, backend records, or a real voice analysis. Navigate among Identity overview, Contract ingestion, Live control room, Generation audit, and Royalty ledger. Use **Use sample contract**, **Simulate breach**, or **Demo mode** to demonstrate the interactions. The demo story lasts 60 seconds; `Ctrl+K` opens the command palette.
+
+The breach panel illustrates a simulated Brazil / gambling scope violation and requires artist review before approving its proposed demo amount. Ledger approvals and payouts are also simulated. Every payment view must state **DEMO / SIMULATED PAYMENT — NO REAL FUNDS TRANSFERRED**. There is no PayPal connection, invoice creation, payout, or transfer in this preview. On narrow/coarse-pointer screens, reduced-motion settings, or low-power devices, the orb uses a 2D fallback; the screens remain usable.
+
 ## 0:00–0:20 — Why FairModel
 
 Show the landing page: “Every voice deserves a fair share. FairModel translates voice licensing into evidence-backed usage rules and transparent royalties. The artist stays in control.” Open the workspace. Explain that the role selector is **demo identity**, not production login.
@@ -26,11 +32,11 @@ Show the exact formula: `max(0, measured speech − 30 seconds) × USD 2`. The p
 
 ## 1:45–2:25 — Approve and simulate settlement
 
-Switch to Artist → Royalties. Open the evidence if needed, enter a review note, and approve the positive charge. Create a **simulated invoice**. Open Invoices & payments and point to:
+Switch to Artist → Royalties. Open the evidence if needed, enter a review note, and approve the positive charge. Create a **simulated invoice**. Open Invoices & payments and use the on-screen three-step guide to explain the Artist → Studio handoff. Point to:
 
 **DEMO / SIMULATED PAYMENT — NO REAL FUNDS TRANSFERRED**
 
-Simulate sending. Switch to Studio and deliberately simulate payment completion. Show the obviously simulated ID and CREATED → SENT → PAID_SIMULATED event history. Explain: “No email or funds transfer occurred. A provider interface isolates the future PayPal adapter.”
+Simulate sending. Switch to Studio and deliberately simulate payment completion. Show the obviously simulated ID and CREATED → SENT → PAID_SIMULATED event history. Use **See PayPal Sandbox status** to confirm the adapter is not connected. Explain: “No PayPal request, email, or funds transfer occurred. A provider interface isolates the future PayPal adapter.”
 
 ## 2:25–3:00 — Accountability and honest status
 

@@ -24,7 +24,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\frontend.ps1
 
 Open **http://localhost:3000**. FastAPI OpenAPI: **http://127.0.0.1:8000/docs**. Both processes bind only to loopback. Stop each with Ctrl+C. The process-scoped execution-policy flag allows the checked-in helper; it does not change the machine's policy.
 
-The landing page opens the workspace. Use the top-right demo persona switcher for **Amara Reed / Artist** and **Northstar Studio**. These are fictional demonstration identities, not production authentication.
+The landing page opens the cinematic [Control Room](/control-room) demo. It is a standalone, client-side simulation using fictional artist Amara Reed and mock studio generations. Use its top navigation to explore the contract portal, live control room, generation audit, and royalty ledger. Its demo mode runs a scripted story; a breach can also be triggered from the control room. No PayPal API or real payment is connected.
+
+The original full-stack workflow remains available at [/dashboard](/dashboard). Use its top-right demo persona switcher for **Amara Reed / Artist** and **Northstar Studio**. These are fictional demonstration identities, not production authentication.
 
 ## Fresh checkout setup
 

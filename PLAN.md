@@ -9,9 +9,10 @@ Status: implemented and locally verified MVP, November 6, 2026. Workspace was em
 - [x] Phase 4: explainable compliance, deterministic Decimal per-asset/cumulative royalties, concurrency and duplicate tests.
 - [x] Phase 5: connected Artist/Studio workflows, role restrictions and assigned ownership, recoverable held-submission metadata.
 - [x] Phase 6: persistent simulated invoices, artist charge decisions, deduplicated payment events, audit trail.
-- [x] Phase 7: professional responsive UI, AG Grid, first-party fixtures, private playback, source-page links and integration tests. Desktop and mobile/error-recovery browser tests pass.
+- [x] Phase 7: responsive UI, AG Grid, first-party fixtures, private playback, source-page links and integration tests. Refreshed the landing page and workspace with a warm creator-focused palette, an animated voice-rights preview, higher-contrast navigation, responsive layouts and reduced-motion support.
+- [x] Control Room preview: standalone `/control-room` experience with a fictional artist, client-side generation simulation, contract/audit/ledger screens, reactive orb, breach story and simulated payout flow. Fixed oversized orb shader points and kept background simulation events from forcibly navigating to the Control Room. Typecheck, lint, production build and browser rendering verified. This is a visual mock only; its sample metrics and voice-match display are not backend analysis, and it does not connect to PayPal.
 - [ ] Phase 8: isolated optional ECAPA-TDNN CLI and failure/input tests implemented. Actual model inference intentionally unverified; core flag remains disabled. No heavy dependency/model download.
-- [x] Phase 9: README, API/architecture guides, three-minute demo, submission status and PowerShell helpers.
+- [x] Phase 9: README, API/architecture guides, three-minute demo, submission status, PowerShell helpers, and an invoice-screen walkthrough clarifying the simulated Artist → Studio settlement and PayPal Sandbox status.
 - [ ] Deferred: real PayPal Sandbox OAuth, Invoicing v2, verified/idempotent webhooks. Requires explicit user authorization after account access is restored.
 
 ## Verification log
@@ -24,6 +25,8 @@ Status: implemented and locally verified MVP, November 6, 2026. Workspace was em
 - The previous configured Gemini 2.5 Flash-Lite generation request returned 404. Model listing confirmed key access; the supported `gemini-3.1-flash-lite` replacement succeeded. Updated the code default, `.env.example` and only the non-secret model setting in the local `.env`; no key values were displayed or logged.
 - Backend lint and all 47 automated tests pass after the model-setting update. Frontend behavior is unchanged; its prior build/browser checks remain applicable. Automated tests continue using mocks/explicit fixtures and are distinct from the actual live smoke checks.
 - Speaker model not downloaded/run. PayPal intentionally deferred, not a completed integration. No external financial action occurred.
+- November 9 demo polish: Added an accessible Artist → Studio → Both walkthrough to the invoice screen, a direct link to PayPal Sandbox status, and corresponding judging-script guidance. Ruff passes. The backend test run reports 44 passed and 2 failed because FFmpeg/ffprobe are unavailable in this workspace. No real payment integration or API call was enabled.
+- November 9 frontend refresh: Landing page, shared workspace styling and dashboard welcome treatment refreshed. TypeScript, ESLint and production build pass; browser checks confirmed homepage rendering and no mobile horizontal overflow. Existing simulated-payment behavior and disclosures remain unchanged.
 
 ## Run commands
 
