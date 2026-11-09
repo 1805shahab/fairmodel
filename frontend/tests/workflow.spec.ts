@@ -117,6 +117,19 @@ test("artist and studio complete the real-media local fixture workflow", async (
   await page
     .getByRole("link", { name: "Invoices & payments", exact: true })
     .click();
+  const paymentSteps = page.getByRole("list", {
+    name: "Simulated payment demonstration steps",
+  });
+  await expect(paymentSteps).toBeVisible();
+  await expect(paymentSteps).toContainText(
+    "Approves the royalty, then simulates sending the invoice.",
+  );
+  await expect(paymentSteps).toContainText(
+    "Simulates payment completion; no funds move.",
+  );
+  await expect(
+    page.getByRole("link", { name: "See PayPal Sandbox status" }),
+  ).toBeVisible();
   const draft = page
     .locator(".invoice-card")
     .filter({

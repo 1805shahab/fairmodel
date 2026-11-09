@@ -1,7 +1,9 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  ArrowUpRight,
   AudioLines,
+  Check,
   FileCheck2,
   ShieldCheck,
   Sparkles,
@@ -18,38 +20,98 @@ export default function Landing() {
           fairmodel<span className="brand-dot">.</span>
         </Link>
         <span className="small hide-mobile">VOICE RIGHTS. MADE RIGHT.</span>
-        <Link className="button secondary" href="/dashboard">
-          Open workspace <ArrowRight size={16} />
+        <Link className="button secondary" href="/control-room">
+          Open control room <ArrowRight size={16} />
         </Link>
       </nav>
       <section className="landing-hero">
-        <span className="eyebrow">
-          <span className="live-dot" /> THE FUTURE OF VOICE IS FAIR
-        </span>
-        <h1>
-          Every voice deserves
-          <br />a <span>fair share.</span>
-        </h1>
-        <p>
-          Your voice. Your terms. Your royalties. Bring clarity to AI voice
-          licensing, from the first agreement to the final approval.
-        </p>
-        <div className="button-row">
-          <Link className="button" href="/dashboard">
-            Enter demo workspace <ArrowRight size={17} />
-          </Link>
-          <Link className="text-link" href="/dashboard/settings">
-            Explore integrations →
-          </Link>
+        <div className="landing-copy">
+          <span className="eyebrow">
+            <span className="live-dot" /> A FAIRER FUTURE FOR CREATOR VOICES
+          </span>
+          <h1>
+            Every voice
+            <br />
+            deserves a <span>fair share.</span>
+          </h1>
+          <p>
+            Make AI voice licensing easier to understand—from source-backed
+            terms to transparent royalties artists approve.
+          </p>
+          <div className="button-row">
+            <Link className="button" href="/control-room">
+              Open control room <ArrowRight size={17} />
+            </Link>
+            <Link className="text-link" href="/dashboard/settings">
+              See how the demo works <ArrowUpRight size={15} />
+            </Link>
+          </div>
+          <div className="landing-trust">
+            <span>
+              <ShieldCheck size={15} /> Human approval stays in control
+            </span>
+            <span>
+              <AudioLines size={15} /> Usage explained, not guessed
+            </span>
+          </div>
         </div>
-        <span className="small">
-          Local demo personas · Transparent AI evidence · Simulated payments
-        </span>
+        <div className="landing-art" aria-label="FairModel workflow preview">
+          <div className="art-glow" />
+          <div className="art-orbit orbit-one" />
+          <div className="art-orbit orbit-two" />
+          <div className="art-wave" aria-hidden="true">
+            {Array.from({ length: 31 }, (_, i) => (
+              <span
+                key={i}
+                style={
+                  {
+                    "--wave-height": `${18 + Math.abs(Math.sin(i * 0.63)) * (i % 7 === 0 ? 72 : 38)}px`,
+                    "--wave-delay": `${i * 22}ms`,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </div>
+          <div className="art-label">
+            <span className="art-label-icon">
+              <AudioLines size={17} />
+            </span>
+            <span>
+              <strong>Voice rights, made clear.</strong>
+              <small>Terms · Usage · Artist approval</small>
+            </span>
+            <Sparkles size={16} />
+          </div>
+          <div className="art-review">
+            <div className="art-review-top">
+              <span className="art-check">
+                <Check size={15} />
+              </span>
+              <span>
+                <strong>Ready for artist review</strong>
+                <small>Evidence first. People decide.</small>
+              </span>
+              <span className="art-status">REVIEW</span>
+            </div>
+            <div className="art-review-rule" />
+            <div className="art-review-bottom">
+              <span>Agreement terms</span>
+              <span>Usage evidence</span>
+              <span>Royalty approval</span>
+            </div>
+          </div>
+          <span className="art-caption">
+            BUILT FOR CLEARER COLLABORATION
+          </span>
+        </div>
       </section>
       <section className="landing-preview">
         <div className="preview-header">
-          <span className="eyebrow">THE FAIRMODEL WORKFLOW</span>
-          <span className="pill blue">Human approved. Always.</span>
+          <div>
+            <span className="eyebrow">A BETTER WAY TO WORK TOGETHER</span>
+            <h2>Clarity at every step.</h2>
+          </div>
+          <span className="pill blue">Human-approved by design</span>
         </div>
         <div className="workflow-cards">
           {[
@@ -89,7 +151,7 @@ export default function Landing() {
       </section>
       <footer className="landing-footer">
         <span>FairModel © 2026</span>
-        <span>Built for a future where creators come first.</span>
+        <span>Demo payments are simulated. No real funds are transferred.</span>
       </footer>
     </main>
   );

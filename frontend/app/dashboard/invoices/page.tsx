@@ -31,6 +31,26 @@ export default function Invoices() {
           Local mock provider. No PayPal connection, payment request, email, or
           transfer occurs.
         </p>
+        <ol
+          className="payment-demo-steps"
+          aria-label="Simulated payment demonstration steps"
+        >
+          <li>
+            <strong>Artist</strong>
+            <span>Approves the royalty, then simulates sending the invoice.</span>
+          </li>
+          <li>
+            <strong>Studio</strong>
+            <span>Simulates payment completion; no funds move.</span>
+          </li>
+          <li>
+            <strong>Both</strong>
+            <span>Review the locally recorded invoice event history.</span>
+          </li>
+        </ol>
+        <Link className="text-link payment-status-link" href="/dashboard/settings">
+          See PayPal Sandbox status
+        </Link>
       </div>
       {error && <ErrorPanel message={error} retry={retry} />}{" "}
       {loading ? (

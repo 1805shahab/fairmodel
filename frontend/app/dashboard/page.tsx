@@ -34,6 +34,7 @@ export default function Dashboard() {
   return (
     <>
       <PageHeading
+        className="dashboard-welcome"
         eyebrow="YOUR VOICE. YOUR VALUE."
         title={
           role === "artist"
