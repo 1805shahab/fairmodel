@@ -1,0 +1,528 @@
+{
+  "info": {
+    "name": "FairModel - local API and PayPal Sandbox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Contains no credentials/tokens. Readonly requests are safe to inspect. Mutations are skipped by default; Sandbox draft/send bodies also require explicit reviewed confirmations and server write flags. No real money. No payment execution request is included."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "persona",
+      "value": "artist_demo",
+      "type": "string"
+    },
+    {
+      "key": "license_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "asset_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "royalty_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invoice_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "amount",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "currency",
+      "value": "USD",
+      "type": "string"
+    },
+    {
+      "key": "sandbox_buyer_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "allow_explicit_writes",
+      "value": "false",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Application health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "Integration status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/integrations"
+      }
+    },
+    {
+      "name": "Sandbox OAuth and read-only invoicing diagnostic",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/paypal/diagnostic",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Licenses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/licenses"
+      }
+    },
+    {
+      "name": "Approved license and source evidence",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/licenses/{{license_id}}"
+      }
+    },
+    {
+      "name": "Audio analysis and compliance report",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/assets/{{asset_id}}"
+      }
+    },
+    {
+      "name": "Run live audio analysis - opt in",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/assets/{{asset_id}}/analyze",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"use_demo_fixture\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Evaluate live Gemini compliance - opt in",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/assets/{{asset_id}}/evaluate",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"use_demo_fixture\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read overlap comparison",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/assets/{{asset_id}}/overlap"
+      }
+    },
+    {
+      "name": "Artist authorization - edit after real review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/assets/{{asset_id}}/authorization",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"identity_confirmed\": false,\n  \"use_authorized\": false,\n  \"note\": \"Replace this with the actual artist review note.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Royalty entries",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/royalties"
+      }
+    },
+    {
+      "name": "Artist charge decision - opt in",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/royalties/{{royalty_id}}/decision",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approve\": false,\n  \"note\": \"Replace this with the actual charge review decision.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Readonly invoice payload preview",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/royalties/{{royalty_id}}/invoice-preview"
+      }
+    },
+    {
+      "name": "Create Sandbox draft - explicit per-case approval required",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/royalties/{{royalty_id}}/invoice",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"confirm_sandbox\": false,\n  \"expected_amount\": \"{{amount}}\",\n  \"expected_currency\": \"{{currency}}\",\n  \"expected_recipient\": \"{{sandbox_buyer_email}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List invoices - providers preserved",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/invoices"
+      }
+    },
+    {
+      "name": "Invoice and events",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/invoices/{{invoice_id}}"
+      }
+    },
+    {
+      "name": "Send Sandbox invoice - explicit approval required",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/invoices/{{invoice_id}}/send",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_key\": \"manual_send_{{invoice_id}}\",\n  \"confirm_sandbox\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get('allow_explicit_writes') !== 'true') { pm.execution.skipRequest(); }",
+              "// Enable only after reviewing this specific request; Sandbox financial confirmations default false."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh authoritative PayPal status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/invoices/{{invoice_id}}/refresh",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Royalty analytics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Demo-Persona",
+            "value": "{{persona}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/analytics"
+      }
+    }
+  ]
+}

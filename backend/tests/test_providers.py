@@ -95,11 +95,12 @@ def test_demo_rejects_arbitrary_document(tmp_path):
     assert error.value.status_code == 422
 
 
-def test_paypal_adapter_is_deliberately_disabled():
+def test_paypal_adapter_initialization_does_not_call_api_and_writes_default_disabled():
     from app.payments import PayPalSandboxProvider
 
-    with pytest.raises(NotImplementedError):
-        PayPalSandboxProvider()
+    adapter = PayPalSandboxProvider()
+    assert not adapter.config.paypal_allow_drafts
+    assert not adapter.config.paypal_allow_sending
 
 
 def test_settings_errors_do_not_expose_secret_inputs():
@@ -109,3 +110,45 @@ def test_settings_errors_do_not_expose_secret_inputs():
     with pytest.raises(ValidationError) as error:
         Settings(payment_provider="paypal", gemini_api_key="private-test-sentinel")
     assert "private-test-sentinel" not in str(error.value)
+
+
+@pytest.mark.parametrize("code", [401, 403, 404, 429, 503])
+def test_gemini_errors_include_safe_status_without_fixture_fallback(monkeypatch, code):
+    from pydantic import SecretStr
+
+    class ProviderError(Exception):
+        pass
+
+    private_error = ProviderError("private request body and private-test-sentinel")
+    private_error.code = code
+    monkeypatch.setattr(ai.settings, "gemini_api_key", SecretStr("private-test-sentinel"))
+    monkeypatch.setattr(ai.genai, "Client", MagicMock(side_effect=private_error))
+    fixture = MagicMock(side_effect=AssertionError("must not load fixture"))
+    monkeypatch.setattr(ai, "fixture_manifest", fixture)
+    with pytest.raises(HTTPException) as error:
+        ai.gemini_json(Terms, {}, "assess")
+    assert error.value.status_code == 502
+    assert f"provider HTTP {code}" in error.value.detail
+    assert "No fixture fallback" in error.value.detail
+    assert "private-test-sentinel" not in error.value.detail
+    assert "private request" not in error.value.detail
+    fixture.assert_not_called()
+
+
+def test_live_content_passes_approved_terms_and_campaign_to_gemini(monkeypatch, terms):
+    from app.schemas import ContentFindings
+
+    call = MagicMock(return_value=ContentFindings(findings=[], uncertainty=[]))
+    monkeypatch.setattr(ai, "gemini_json", call)
+    result, source = ai.content_findings(
+        terms,
+        "Consented test transcript",
+        False,
+        campaign={"region": "US", "medium": "online advertising", "category": "consumer products"},
+    )
+    assert source.startswith("gemini:") and not result.findings
+    payload = call.call_args.args[1]
+    assert [rule["text"] for rule in payload["content_rules"]] == terms.restricted_categories
+    assert payload["declared_category"] == "consumer products"
+    assert "approved_terms" not in payload and "declared_campaign" not in payload
+    assert payload["transcript"] == "Consented test transcript"

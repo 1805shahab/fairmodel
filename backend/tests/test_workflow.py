@@ -11,17 +11,31 @@ from app import ai, audio
 from app.schemas import ContentFindings
 
 
-def pdf_bytes():
+def pdf_bytes(lines=None):
     stream = io.BytesIO()
     pdf = canvas.Canvas(stream)
-    pdf.drawString(
-        50, 760, "Voice artist Amara. Included duration 30 seconds. Additional rate 2 USD per second."
-    )
+    for i, line in enumerate(
+        lines or ["Voice artist Amara. Included duration 30 seconds. Additional rate 2 USD per second."]
+    ):
+        pdf.drawString(50, 760 - i * 20, line)
     pdf.save()
     return stream.getvalue()
 
 
 def setup_license(client, artist, monkeypatch, terms):
+    from app.schemas import Evidence
+
+    terms = terms.model_copy(deep=True)
+    rows = []
+    evidence = []
+    for name, value in terms.model_dump(mode="json").items():
+        if name in {"evidence", "ambiguities"} or value in (None, [], ""):
+            continue
+        lines = value if name == "special_conditions" else [f"{name}: {json.dumps(value)}"]
+        for line in lines:
+            rows.append(line)
+            evidence.append(Evidence(field=name, page=1, quote=line))
+    terms.evidence = evidence
     monkeypatch.setattr(ai, "extract_contract", lambda *args: (terms, "test_mock (not Gemini)"))
     result = client.post(
         "/api/licenses", headers=artist, json={"title": "Test agreement", "studio_id": "studio_demo"}
@@ -31,7 +45,7 @@ def setup_license(client, artist, monkeypatch, terms):
     upload = client.post(
         f"/api/licenses/{license_id}/contract",
         headers=artist,
-        files={"file": ("license.pdf", pdf_bytes(), "application/pdf")},
+        files={"file": ("license.pdf", pdf_bytes(rows), "application/pdf")},
     )
     assert upload.status_code == 200, upload.text
     extracted = client.post(
@@ -73,10 +87,19 @@ def mock_audio(monkeypatch, seconds="45"):
     monkeypatch.setattr(
         ai,
         "transcribe",
-        lambda *args: {"transcript": "A new collection.", "timestamps": [], "provider": "test mock"},
+        lambda *args: {
+            "transcript": "A new collection.",
+            "timestamps": [],
+            "provider": "demo_fixture (not Groq)" if args[2] else "groq:mock-test",
+        },
     )
     monkeypatch.setattr(
-        ai, "content_findings", lambda *args: (ContentFindings(findings=[], uncertainty=[]), "test mock")
+        ai,
+        "content_findings",
+        lambda *args, **kwargs: (
+            ContentFindings(findings=[], uncertainty=[]),
+            "demo_fixture (not Gemini)" if args[2] else "gemini:mock-test",
+        ),
     )
 
 
@@ -86,6 +109,7 @@ def submit(client, studio, license_id, content=b"test audio", **metadata):
         "region": "US",
         "medium": "online advertising",
         "language": "English",
+        "category": "consumer products",
         "intended_use_date": "2026-11-06",
         **metadata,
     }
@@ -97,9 +121,24 @@ def submit(client, studio, license_id, content=b"test audio", **metadata):
     )
 
 
-def process(client, studio, asset_id):
+def authorize(client, asset_id):
+    return client.post(
+        f"/api/assets/{asset_id}/authorization",
+        headers={"X-Demo-Persona": "artist_demo"},
+        json={
+            "identity_confirmed": True,
+            "use_authorized": True,
+            "note": "Artist reviewed the test identity, permission and campaign evidence.",
+        },
+    )
+
+
+def process(client, studio, asset_id, authorize_usage=True):
     response = client.post(f"/api/assets/{asset_id}/analyze", headers=studio, json={})
     assert response.status_code == 200, response.text
+    detail = client.get(f"/api/assets/{asset_id}", headers=studio).json()
+    if authorize_usage and detail.get("authorization_state") != "artist_confirmed":
+        assert authorize(client, asset_id).status_code == 200
     response = client.post(f"/api/assets/{asset_id}/evaluate", headers=studio, json={})
     assert response.status_code == 200, response.text
     return response.json()
@@ -208,6 +247,7 @@ def test_metadata_recovery(client, artist, studio, monkeypatch, terms):
             "region": "US",
             "medium": "online advertising",
             "language": "English",
+            "category": "consumer products",
             "intended_use_date": "2026-11-06",
         },
     )
@@ -216,6 +256,14 @@ def test_metadata_recovery(client, artist, studio, monkeypatch, terms):
     assert (
         client.patch(
             f"/api/assets/{asset_id}/campaign", headers=studio, json=fixed.json()["campaign"]
+        ).status_code
+        == 200
+    )
+    assert (
+        client.patch(
+            f"/api/assets/{asset_id}/campaign",
+            headers=studio,
+            json={**fixed.json()["campaign"], "name": "A changed allocated campaign"},
         ).status_code
         == 409
     )
@@ -352,6 +400,7 @@ def test_concurrent_duplicates_allocate_once(client, artist, studio, monkeypatch
     assert len({r.json()["id"] for r in results}) == 1
     asset_id = results[0].json()["id"]
     assert client.post(f"/api/assets/{asset_id}/analyze", headers=studio, json={}).status_code == 200
+    assert authorize(client, asset_id).status_code == 200
     with ThreadPoolExecutor(max_workers=2) as pool:
         reports = list(
             pool.map(
@@ -419,6 +468,7 @@ def test_actual_demo_media_pipeline(client, artist, studio):
     result = measured.json()["result"]
     assert float(result["duration_seconds"]) > float(result["spoken_seconds"]) > 30
     assert result["provider"] == "demo_fixture (not Groq)"
+    assert authorize(client, asset_id).status_code == 200
     report = client.post(f"/api/assets/{asset_id}/evaluate", headers=studio, json={"use_demo_fixture": True})
     assert report.status_code == 200, report.text
     assert report.json()["status"] == "ADDITIONAL_ROYALTY_DUE"

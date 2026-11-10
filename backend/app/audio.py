@@ -1,4 +1,5 @@
 import json
+import hashlib
 import shutil
 import subprocess
 import wave
@@ -143,3 +144,17 @@ def availability() -> dict:
         "ffmpeg": bool(shutil.which(settings.ffmpeg_binary)),
         "ffprobe": bool(shutil.which(settings.ffprobe_binary)),
     }
+
+
+def normalized_fingerprint(path: Path) -> dict:
+    """Exact decoded-sample identity across WAV headers/containers; not speaker identity."""
+    try:
+        with wave.open(str(path), "rb") as source:
+            if (source.getnchannels(), source.getsampwidth(), source.getframerate()) != (1, 2, 16000):
+                raise ValueError("Not normalized PCM")
+            digest = hashlib.sha256()
+            while chunk := source.readframes(16384):
+                digest.update(chunk)
+        return {"pcm_sha256": digest.hexdigest(), "fingerprint_method": "exact normalized PCM SHA-256"}
+    except (OSError, ValueError, wave.Error, EOFError):
+        return {"pcm_sha256": None, "fingerprint_method": "unavailable; transcript overlap screening only"}

@@ -54,7 +54,8 @@ export default function Submissions() {
                   <th>DECLARED REGION</th>
                   <th>MEDIUM</th>
                   <th>SUBMITTED</th>
-                  <th>STATUS</th>
+                  <th>AUDIO</th>
+                  <th>COMPLIANCE</th>
                   <th />
                 </tr>
               </thead>
@@ -79,7 +80,10 @@ export default function Submissions() {
                     <td>{x.campaign.medium || "Not supplied"}</td>
                     <td className="nowrap muted">{date(x.created_at)}</td>
                     <td>
-                      <Badge status={x.status} />
+                      <Badge status={x.processing_state || x.status} />
+                    </td>
+                    <td>
+                      <Badge status={x.compliance_state || "PENDING"} />
                     </td>
                     <td>
                       <Link

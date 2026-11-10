@@ -14,6 +14,7 @@ import {
 import { endpoint, api, post } from "./api";
 import { useWorkspace } from "./workspace";
 import type { License, Terms } from "./types";
+import SourceCitations from "./source-citations";
 
 const lists: [keyof Terms, string][] = [
   ["permitted_media", "Permitted media"],
@@ -136,143 +137,157 @@ function Review({ license }: { license: License }) {
             </div>
             <Badge status={license.status} />
           </div>
-          <fieldset disabled={!editable || busy}>
-            <div className="form-grid">
-              <Field label="Voice artist">
-                <input
-                  value={terms.artist || ""}
-                  onChange={(e) => update("artist", e.target.value || null)}
-                />
-              </Field>
-              <Field label="Production studio">
-                <input
-                  value={terms.studio || ""}
-                  onChange={(e) => update("studio", e.target.value || null)}
-                />
-              </Field>
-              <Field label="License starts">
-                <input
-                  type="date"
-                  value={terms.start_date || ""}
-                  onChange={(e) => update("start_date", e.target.value || null)}
-                />
-              </Field>
-              <Field label="License ends">
-                <input
-                  type="date"
-                  value={terms.end_date || ""}
-                  onChange={(e) => update("end_date", e.target.value || null)}
-                />
-              </Field>
-            </div>
-            {lists.slice(0, 5).map(([key, label]) => (
-              <Field
-                key={key}
-                label={label}
-                hint="Separate values with commas. An empty field remains unknown."
-              >
-                <RuleInput
-                  initial={terms[key] as string[] | null}
-                  onChange={(values) =>
-                    update(key, values.length ? values : null)
-                  }
-                />
-              </Field>
-            ))}
-            <div className="form-grid">
-              <Field label="Included voiced seconds">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  value={terms.included_seconds ?? ""}
-                  onChange={(e) =>
-                    update("included_seconds", e.target.value || null)
-                  }
-                />
-              </Field>
-              <Field label="Additional rate per second">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  value={terms.additional_rate ?? ""}
-                  onChange={(e) =>
-                    update("additional_rate", e.target.value || null)
-                  }
-                />
-              </Field>
-              <Field label="Billing basis">
+          {active ? (
+            <ApprovedTerms terms={terms} />
+          ) : (
+            <fieldset disabled={!editable || busy}>
+              <h3 className="term-group-title">Parties & validity</h3>
+              <div className="form-grid">
+                <Field label="Voice artist">
+                  <input
+                    value={terms.artist || ""}
+                    onChange={(e) => update("artist", e.target.value || null)}
+                  />
+                </Field>
+                <Field label="Production studio">
+                  <input
+                    value={terms.studio || ""}
+                    onChange={(e) => update("studio", e.target.value || null)}
+                  />
+                </Field>
+                <Field label="License starts">
+                  <input
+                    type="date"
+                    value={terms.start_date || ""}
+                    onChange={(e) =>
+                      update("start_date", e.target.value || null)
+                    }
+                  />
+                </Field>
+                <Field label="License ends">
+                  <input
+                    type="date"
+                    value={terms.end_date || ""}
+                    onChange={(e) => update("end_date", e.target.value || null)}
+                  />
+                </Field>
+              </div>
+              <h3 className="term-group-title">
+                Permitted scope & content restrictions
+              </h3>
+              {lists.slice(0, 5).map(([key, label]) => (
+                <Field
+                  key={key}
+                  label={label}
+                  hint="Separate values with commas. An empty field remains unknown."
+                >
+                  <RuleInput
+                    initial={terms[key] as string[] | null}
+                    onChange={(values) =>
+                      update(key, values.length ? values : null)
+                    }
+                  />
+                </Field>
+              ))}
+              <h3 className="term-group-title">Usage & financial rules</h3>
+              <div className="form-grid">
+                <Field label="Included voiced seconds">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    value={terms.included_seconds ?? ""}
+                    onChange={(e) =>
+                      update("included_seconds", e.target.value || null)
+                    }
+                  />
+                </Field>
+                <Field label="Additional rate per second">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.0001"
+                    value={terms.additional_rate ?? ""}
+                    onChange={(e) =>
+                      update("additional_rate", e.target.value || null)
+                    }
+                  />
+                </Field>
+                <Field label="Billing basis">
+                  <select
+                    value={terms.billing_basis || ""}
+                    onChange={(e) =>
+                      update(
+                        "billing_basis",
+                        (e.target.value || null) as Terms["billing_basis"],
+                      )
+                    }
+                  >
+                    <option value="">Unknown</option>
+                    <option value="per_asset">Per asset</option>
+                    <option value="cumulative">Cumulative per license</option>
+                  </select>
+                </Field>
+                <Field label="Currency">
+                  <select
+                    value={terms.currency || ""}
+                    onChange={(e) =>
+                      update(
+                        "currency",
+                        (e.target.value || null) as Terms["currency"],
+                      )
+                    }
+                  >
+                    <option value="">Unknown</option>
+                    <option>USD</option>
+                    <option>EUR</option>
+                    <option>GBP</option>
+                  </select>
+                </Field>
+              </div>
+              <Field label="Is additional usage explicitly permitted?">
                 <select
-                  value={terms.billing_basis || ""}
+                  value={
+                    terms.additional_usage_permitted === null
+                      ? "unknown"
+                      : String(terms.additional_usage_permitted)
+                  }
                   onChange={(e) =>
                     update(
-                      "billing_basis",
-                      (e.target.value || null) as Terms["billing_basis"],
+                      "additional_usage_permitted",
+                      e.target.value === "unknown"
+                        ? null
+                        : e.target.value === "true",
                     )
                   }
                 >
-                  <option value="">Unknown</option>
-                  <option value="per_asset">Per asset</option>
-                  <option value="cumulative">Cumulative per license</option>
+                  <option value="unknown">Unknown</option>
+                  <option value="true">
+                    Yes — at the approved additional rate
+                  </option>
+                  <option value="false">
+                    No — additional usage is restricted
+                  </option>
                 </select>
               </Field>
-              <Field label="Currency">
-                <select
-                  value={terms.currency || ""}
-                  onChange={(e) =>
-                    update(
-                      "currency",
-                      (e.target.value || null) as Terms["currency"],
-                    )
-                  }
+              <h3 className="term-group-title">
+                Conditions & unresolved terms
+              </h3>
+              {lists.slice(5).map(([key, label]) => (
+                <Field
+                  key={key}
+                  label={label}
+                  hint="One clause per line. Resolve ambiguities by reviewing the source."
                 >
-                  <option value="">Unknown</option>
-                  <option>USD</option>
-                  <option>EUR</option>
-                  <option>GBP</option>
-                </select>
-              </Field>
-            </div>
-            <Field label="Is additional usage explicitly permitted?">
-              <select
-                value={
-                  terms.additional_usage_permitted === null
-                    ? "unknown"
-                    : String(terms.additional_usage_permitted)
-                }
-                onChange={(e) =>
-                  update(
-                    "additional_usage_permitted",
-                    e.target.value === "unknown"
-                      ? null
-                      : e.target.value === "true",
-                  )
-                }
-              >
-                <option value="unknown">Unknown</option>
-                <option value="true">
-                  Yes — at the approved additional rate
-                </option>
-                <option value="false">
-                  No — additional usage is restricted
-                </option>
-              </select>
-            </Field>
-            {lists.slice(5).map(([key, label]) => (
-              <Field
-                key={key}
-                label={label}
-                hint="One clause per line. Resolve ambiguities by reviewing the source."
-              >
-                <RuleInput
-                  multiline
-                  initial={terms[key] as string[]}
-                  onChange={(values) => update(key, values)}
-                />
-              </Field>
-            ))}
-          </fieldset>
+                  <RuleInput
+                    multiline
+                    initial={terms[key] as string[]}
+                    onChange={(values) => update(key, values)}
+                  />
+                </Field>
+              ))}
+            </fieldset>
+          )}
           {editable && (
             <>
               <Field
@@ -334,31 +349,18 @@ function Review({ license }: { license: License }) {
                 <p>Verified quotes from the uploaded PDF.</p>
               </div>
             </div>
-            <div className="evidence-list">
-              {terms.evidence.length ? (
-                terms.evidence.map((x, i) => (
-                  <article key={i}>
-                    <span className="eyebrow">
-                      {x.field.replaceAll("_", " ")} · PAGE {x.page}
-                    </span>
-                    <blockquote>“{x.quote}”</blockquote>
-                    <a
-                      className="text-link"
-                      href={`${endpoint(`/licenses/${license.id}/contract`)}#page=${x.page}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Open source page {x.page} ↗
-                    </a>
-                  </article>
-                ))
-              ) : (
-                <p className="muted">
-                  Run extraction to see supporting text. Manually entered terms
-                  should be checked against the source document.
-                </p>
-              )}
-            </div>
+            <details className="contract-citations" open={!active}>
+              <summary>Supporting PDF clauses</summary>
+              <SourceCitations
+                items={license.source_review?.citations || []}
+                licenseId={license.id}
+              />
+            </details>
+            {license.source_review?.review_reasons.length ? (
+              <div className="alert warning">
+                {license.source_review.review_reasons.join(" ")}
+              </div>
+            ) : null}
           </section>
           <details className="panel source-pages">
             <summary>Extracted PDF text · {license.pages.length} pages</summary>
@@ -376,6 +378,87 @@ function Review({ license }: { license: License }) {
         </aside>
       </div>
     </>
+  );
+}
+
+function ApprovedTerms({ terms }: { terms: Terms }) {
+  const list = (values: string[] | null) =>
+    values?.length ? values.join("; ") : "None recorded / review source scope";
+  const groups = [
+    {
+      title: "Parties & validity",
+      rows: [
+        ["Voice artist", terms.artist],
+        ["Production studio", terms.studio],
+        ["License starts", terms.start_date],
+        ["License ends", terms.end_date],
+      ],
+    },
+    {
+      title: "Permitted scope",
+      rows: [
+        ["Media", list(terms.permitted_media)],
+        ["Territories", list(terms.territories)],
+        ["Languages", list(terms.languages)],
+        ["Campaigns", list(terms.campaigns)],
+      ],
+    },
+    {
+      title: "Usage & financial rules",
+      rows: [
+        [
+          "Included voiced duration",
+          terms.included_seconds == null
+            ? null
+            : `${terms.included_seconds} seconds`,
+        ],
+        ["Billing basis", terms.billing_basis?.replaceAll("_", " ")],
+        [
+          "Additional rate",
+          terms.additional_rate == null
+            ? null
+            : `${terms.additional_rate} ${terms.currency || "(currency unknown)"} / second`,
+        ],
+        [
+          "Additional usage permitted",
+          terms.additional_usage_permitted == null
+            ? null
+            : terms.additional_usage_permitted
+              ? "Yes, at the approved rate"
+              : "No",
+        ],
+      ],
+    },
+    {
+      title: "Restrictions & special conditions",
+      rows: [
+        ["Restricted categories", list(terms.restricted_categories)],
+        ["Special conditions", list(terms.special_conditions)],
+        [
+          "Ambiguous or missing clauses",
+          terms.ambiguities.length
+            ? terms.ambiguities.join("; ")
+            : "None recorded",
+        ],
+      ],
+    },
+  ];
+  return (
+    <div className="approved-terms">
+      {groups.map((group) => (
+        <section key={group.title}>
+          <h3>{group.title}</h3>
+          <dl>
+            {group.rows.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value || "Unknown — requires review"}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))}
+    </div>
   );
 }
 

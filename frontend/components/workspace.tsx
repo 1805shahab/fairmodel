@@ -10,10 +10,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
-  ArrowUpRight,
   AudioLines,
   ChartNoAxesCombined,
-  ChevronDown,
   FileText,
   LayoutDashboard,
   Menu,
@@ -59,6 +57,16 @@ const links = [
   { href: "/dashboard/analytics", label: "Analytics", Icon: Activity },
 ];
 
+const utilityLinks = [
+  { href: "/dashboard/references", label: "Reference voice", Icon: Mic2 },
+  { href: "/dashboard/audit", label: "Audit trail", Icon: ShieldCheck },
+  {
+    href: "/dashboard/settings",
+    label: "Settings & integrations",
+    Icon: Settings2,
+  },
+];
+
 export default function Workspace({
   children,
   initialRole,
@@ -70,6 +78,7 @@ export default function Workspace({
   const [revision, setRevision] = useState(0);
   const [message, setMessage] = useState("");
   const [mobile, setMobile] = useState(false);
+  const [search, setSearch] = useState("");
   const [switching, setSwitching] = useState(false);
   const path = usePathname();
   const refresh = useCallback(() => setRevision((x) => x + 1), []);
@@ -90,145 +99,105 @@ export default function Workspace({
       if (!response.ok) throw new Error("Could not switch persona.");
       setRole(value);
       refresh();
-      notify(`Switched to ${value} demo persona.`);
+      notify(`Now viewing the ${value} workspace role.`);
     } catch {
-      notify("Could not switch persona. Please retry.");
+      notify("Could not switch workspace role. Please retry.");
     } finally {
       setSwitching(false);
     }
   }
+  useEffect(() => {
+    function shortcut(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearch("");
+        setMobile((value) => !value);
+      }
+    }
+    window.addEventListener("keydown", shortcut);
+    return () => window.removeEventListener("keydown", shortcut);
+  }, []);
+  useEffect(() => {
+    if (!mobile) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobile(false);
+        requestAnimationFrame(() =>
+          document.getElementById("workspace-menu-toggle")?.focus(),
+        );
+      }
+      if (event.key === "Tab") {
+        const controls = document.querySelectorAll<HTMLElement>(
+          "#workspace-mobile-navigation button, #workspace-mobile-navigation input, #workspace-mobile-navigation a",
+        );
+        const first = controls[0],
+          last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobile]);
+
+  function navigationLink({ href, label, Icon }: (typeof links)[number]) {
+    const active =
+      path === href || (href !== "/dashboard" && path.startsWith(href + "/"));
+    return (
+      <Link
+        key={href}
+        href={href}
+        className={`workspace-nav-link ${active ? "active" : ""}`}
+        aria-current={active ? "page" : undefined}
+        onClick={() => setMobile(false)}
+      >
+        <Icon size={16} />
+        {label}
+      </Link>
+    );
+  }
+
   return (
     <Context.Provider value={{ role, revision, refresh, notify }}>
-      <div className="workspace">
-        <aside className={`sidebar ${mobile ? "open" : ""}`}>
-          <div className="sidebar-brand">
-            <Link className="brand" href="/">
-              <span className="brand-icon">
-                <AudioLines size={23} />
-              </span>
-              fairmodel<span className="brand-dot">.</span>
-            </Link>
-            <button
-              className="icon-button mobile-only"
-              aria-label="Close navigation"
-              onClick={() => setMobile(false)}
+      <div className="workspace workspace-control workspace-stage">
+        <a className="workspace-skip-link" href="#workspace-content">
+          Skip to content
+        </a>
+        <header className="stage-header" inert={mobile}>
+          <div className="stage-topbar">
+            <Link
+              className="stage-brand"
+              href="/dashboard"
+              aria-label="FairModel workspace"
             >
-              <X size={20} />
-            </button>
-          </div>
-          <div className="workspace-label">
-            <span className="workspace-avatar">
-              {role === "artist" ? "AR" : "NS"}
-            </span>
-            <div>
-              <strong>
-                {role === "artist" ? "Amara’s workspace" : "Northstar Studio"}
-              </strong>
-              <span>Demo {role} account</span>
-            </div>
-            <ChevronDown size={15} />
-          </div>
-          <span className="nav-heading">WORKSPACE</span>
-          <nav aria-label="Main navigation">
-            {links.map(({ href, label, Icon }) => (
-              <Link
-                onClick={() => setMobile(false)}
-                key={href}
-                href={href}
-                className={`nav-link ${path === href || (href !== "/dashboard" && path.startsWith(href + "/")) ? "active" : ""}`}
-              >
-                <Icon size={18} />
-                {label}
-                {label === "Voice licenses" && <span className="nav-dot" />}
-              </Link>
-            ))}
-          </nav>
-          <span className="nav-heading lower">MANAGE</span>
-          <Link
-            className={`nav-link ${path === "/dashboard/references" ? "active" : ""}`}
-            href="/dashboard/references"
-          >
-            <Mic2 size={18} />
-            Reference voice
-          </Link>
-          <Link
-            className={`nav-link ${path === "/dashboard/audit" ? "active" : ""}`}
-            href="/dashboard/audit"
-          >
-            <ShieldCheck size={18} />
-            Audit trail
-          </Link>
-          <Link
-            className={`nav-link ${path === "/dashboard/settings" ? "active" : ""}`}
-            href="/dashboard/settings"
-          >
-            <Settings2 size={18} />
-            Demo & integrations
-          </Link>
-          <div className="sidebar-bottom">
-            <div className="creator-note">
-              <span className="live-dot" /> CREATORS COME FIRST
-              <p>
-                Your voice stays yours.
-                <br />
-                We help keep it that way.
-              </p>
-              <Link href="/dashboard/licenses">
-                Manage your rights <ArrowUpRight size={14} />
-              </Link>
-            </div>
-            <div className="sidebar-profile">
-              <span className="avatar">{role === "artist" ? "AR" : "NS"}</span>
-              <div>
-                <strong>
-                  {role === "artist" ? "Amara Reed" : "Northstar Studio"}
-                </strong>
-                <span>Demo {role}</span>
-              </div>
-              <span className="online-dot" />
-            </div>
-          </div>
-        </aside>
-        {mobile && (
-          <button
-            aria-label="Close navigation overlay"
-            className="scrim"
-            onClick={() => setMobile(false)}
-          />
-        )}
-        <div className="workspace-main">
-          <header className="topbar">
-            <div className="breadcrumb">
+              <AudioLines size={23} /> FAIRMODEL<span>®</span>
+            </Link>
+            <span className="stage-edition">VOICE RIGHTS / WORKSPACE</span>
+            <div className="stage-topbar-actions">
               <button
-                className="icon-button mobile-only"
+                id="workspace-menu-toggle"
+                className="stage-launcher"
                 aria-label="Open navigation"
-                onClick={() => setMobile(true)}
+                aria-expanded={mobile}
+                aria-controls="workspace-mobile-navigation"
+                onClick={() => {
+                  setSearch("");
+                  setMobile(true);
+                }}
               >
-                <Menu size={21} />
+                <Menu size={17} />
+                <span>Jump to a page</span>
+                <kbd>Ctrl K</kbd>
               </button>
-              <span>Workspace</span>
-              <span>/</span>
-              <strong>
-                {links.find(
-                  (x) => x.href !== "/dashboard" && path.startsWith(x.href),
-                )?.label ||
-                  (path.includes("settings")
-                    ? "Integrations"
-                    : path.includes("references")
-                      ? "Reference voice"
-                      : path.includes("audit")
-                        ? "Audit trail"
-                        : "Overview")}
-              </strong>
-            </div>
-            <div className="topbar-right">
-              <span className="demo-label">
-                <span className="live-dot" /> LOCAL DEMO
-              </span>
               <label className="role-select">
-                <span className="sr-only">Demo persona</span>
+                <span className="sr-only">Workspace role</span>
                 <select
-                  aria-label="Demo persona"
+                  aria-label="Workspace role"
                   disabled={switching}
                   value={role}
                   onChange={(e) => void switchRole(e.target.value as Role)}
@@ -238,17 +207,94 @@ export default function Workspace({
                 </select>
               </label>
             </div>
-          </header>
-          <div className="demo-ribbon">
-            <ShieldCheck size={14} />
-            <span>
-              Demo personas · Human-approved royalties · Simulated payments only
-            </span>
-            <Link href="/dashboard/settings">
-              View setup <ArrowUpRight size={12} />
-            </Link>
           </div>
-          <main className="page-content" key={role}>
+          <nav className="stage-navigation" aria-label="Main navigation">
+            {links.map(navigationLink)}
+          </nav>
+          <div className="stage-utility-bar">
+            <span className="stage-local-access">
+              <ShieldCheck size={12} /> Local role access · test payments only
+            </span>
+            <nav aria-label="Workspace tools">
+              {utilityLinks.map(navigationLink)}
+            </nav>
+          </div>
+        </header>
+        {mobile && (
+          <>
+            <button
+              className="workspace-menu-scrim"
+              aria-label="Close navigation overlay"
+              onClick={() => setMobile(false)}
+            />
+            <aside
+              className="workspace-mobile-menu"
+              id="workspace-mobile-navigation"
+              aria-label="Workspace navigation"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="workspace-mobile-heading">
+                <span className="eyebrow">YOUR WORKSPACE</span>
+                <button
+                  className="icon-button"
+                  aria-label="Close navigation"
+                  onClick={() => setMobile(false)}
+                >
+                  <X size={21} />
+                </button>
+              </div>
+              <label className="stage-page-search">
+                Find a page
+                <input
+                  autoFocus
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Licenses, invoices, analytics…"
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      document
+                        .querySelector<HTMLElement>(
+                          "#workspace-mobile-navigation nav a",
+                        )
+                        ?.focus();
+                    }
+                  }}
+                />
+              </label>
+              <nav aria-label="Mobile navigation">
+                {links
+                  .filter((item) =>
+                    item.label.toLowerCase().includes(search.toLowerCase()),
+                  )
+                  .map(navigationLink)}
+                <span className="workspace-menu-divider" />
+                {utilityLinks
+                  .filter((item) =>
+                    item.label.toLowerCase().includes(search.toLowerCase()),
+                  )
+                  .map(navigationLink)}
+              </nav>
+              {![...links, ...utilityLinks].some((item) =>
+                item.label.toLowerCase().includes(search.toLowerCase()),
+              ) && (
+                <p className="small">
+                  No matching pages. Try “license” or “invoice”.
+                </p>
+              )}
+              <p className="small">Arrow down to browse · Escape to close</p>
+            </aside>
+          </>
+        )}
+        <div className="workspace-main" inert={mobile}>
+          <main
+            className="page-content"
+            id="workspace-content"
+            key={role}
+            tabIndex={-1}
+          >
             {children}
           </main>
           <footer className="workspace-footer">

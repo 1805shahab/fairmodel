@@ -15,7 +15,7 @@ export default function AuditPage() {
       <PageHeading
         eyebrow="ACCOUNTABILITY, BUILT IN"
         title="Audit trail"
-        description="Contract decisions, audio processing, compliance findings and simulated payment events."
+        description="Contract decisions, audio processing, artist reviews and provider-labeled payment events."
       />
       {error && <ErrorPanel message={error} retry={retry} />}
       <section className="panel">

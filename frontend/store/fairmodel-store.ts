@@ -1,9 +1,15 @@
 import { create } from "zustand";
-import { analyzeGeneration, createInvoice, sendPayout } from "@/lib/mock/api";
+import {
+  analyzeGeneration,
+  createInvoice,
+  sendPayout,
+  sampleRoyaltyCents,
+} from "@/lib/mock/api";
 
 export type Screen = "hero" | "contract" | "control" | "audit" | "ledger";
 export type GenerationStatus = "analyzing" | "approved" | "overage" | "breach";
-export type InvoiceStatus = "REVIEW_REQUIRED" | "APPROVED" | "SENT" | "PAID_SIMULATED";
+export type InvoiceStatus =
+  "REVIEW_REQUIRED" | "APPROVED" | "SENT" | "PAID_SIMULATED";
 export type Role = "talent" | "studio";
 
 export interface Generation {
@@ -27,7 +33,7 @@ export interface Invoice {
   amountCents: number;
   status: InvoiceStatus;
   createdAt: string;
-  paypalDemo: true;
+  simulated: true;
   transactionId?: string;
 }
 
@@ -55,7 +61,7 @@ interface FairModelState {
   ingestContract: () => void;
   completeContract: () => void;
   createGeneration: (kind?: "normal" | "overage" | "breach") => Promise<string>;
-  approveGeneration: (id: string) => void;
+  approveGeneration: (id: string) => Promise<void>;
   approveInvoice: (id: string) => void;
   releasePayout: (id: string) => Promise<void>;
   releaseBatch: (ids: string[]) => Promise<void>;
@@ -74,7 +80,7 @@ const initialGenerations: Generation[] = [
     medium: "Social reel",
     transcript: ["The sound of a slower morning.", "Made for your everyday."],
     status: "approved",
-    amountCents: 90,
+    amountCents: sampleRoyaltyCents(18),
     createdAt: new Date(Date.now() - 3_600_000).toISOString(),
     artistApproved: false,
   },
@@ -88,7 +94,7 @@ const initialGenerations: Generation[] = [
     medium: "Digital video",
     transcript: ["A little more room to breathe."],
     status: "approved",
-    amountCents: 120,
+    amountCents: sampleRoyaltyCents(24),
     createdAt: new Date(Date.now() - 7_200_000).toISOString(),
     artistApproved: true,
   },
@@ -102,14 +108,19 @@ const initialGenerations: Generation[] = [
     medium: "Podcast",
     transcript: ["Find your own kind of balance."],
     status: "overage",
-    amountCents: 255,
+    amountCents: sampleRoyaltyCents(34),
     createdAt: new Date(Date.now() - 15_000_000).toISOString(),
     artistApproved: true,
   },
 ];
 
 const regions = ["United States", "Canada", "United Kingdom", "United States"];
-const studios = ["Northstar Studio", "Goodwell Audio", "Morrow Creative", "Little Current"];
+const studios = [
+  "Northstar Studio",
+  "Goodwell Audio",
+  "Morrow Creative",
+  "Little Current",
+];
 const categories = ["Lifestyle", "Wellness", "Travel", "Home"];
 const transcriptOptions = [
   ["A better rhythm for every day.", "Find your own kind of balance."],
@@ -122,6 +133,7 @@ let engineTimer: ReturnType<typeof setTimeout> | undefined;
 let breachTimer: ReturnType<typeof setTimeout> | undefined;
 let demoTimers: ReturnType<typeof setTimeout>[] = [];
 let generationSequence = 1043;
+const creatingInvoices = new Set<string>();
 
 export const useFairModel = create<FairModelState>((set, get) => ({
   screen: "hero",
@@ -141,13 +153,26 @@ export const useFairModel = create<FairModelState>((set, get) => ({
   setRole: (role) => set({ role }),
   selectGeneration: (id) => set({ selectedGenerationId: id, screen: "audit" }),
   setAudioLevel: (audioLevel) => set({ audioLevel }),
-  recoverBreach: () => set({ breachActive: false, notify: "Scope returned to calm. The breach remains in the audit trail." }),
+  recoverBreach: () =>
+    set({
+      breachActive: false,
+      notify: "Scope returned to calm. The breach remains in the audit trail.",
+    }),
   setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
   setNotify: (notify) => set({ notify }),
   ingestContract: () => {
-    set({ contractVerified: true, screen: "contract", notify: "Sample license scope verified." });
+    set({
+      contractVerified: true,
+      screen: "contract",
+      notify:
+        "Fictional sample terms loaded. No PDF extraction or approval was performed.",
+    });
   },
-  completeContract: () => set({ screen: "control", notify: "Contract shell locked. Live scope monitoring is on." }),
+  completeContract: () =>
+    set({
+      screen: "control",
+      notify: "Sample shell loaded. Fictional event simulation is on.",
+    }),
   createGeneration: async (kind = "normal") => {
     const seed = Math.floor(Math.random() * transcriptOptions.length);
     const id = `GEN-${generationSequence++}`;
@@ -156,13 +181,19 @@ export const useFairModel = create<FairModelState>((set, get) => ({
       id,
       studio: kind === "breach" ? "Morrow Creative" : studios[seed],
       assetType: ["Social reel", "Digital spot", "Podcast intro"][seed % 3],
-      durationSeconds: kind === "overage" ? 37 : kind === "breach" ? 22 : 14 + (seed * 7) % 14,
+      durationSeconds:
+        kind === "overage"
+          ? 37
+          : kind === "breach"
+            ? 22
+            : 14 + ((seed * 7) % 14),
       region: kind === "breach" ? "Brazil" : regions[seed],
       category: kind === "breach" ? "Gambling" : categories[seed],
       medium: ["Social reel", "Digital video", "Podcast"][seed % 3],
-      transcript: kind === "breach"
-        ? ["Try your luck tonight.", "A regional variation for Brazil."]
-        : transcriptOptions[seed],
+      transcript:
+        kind === "breach"
+          ? ["Try your luck tonight.", "A regional variation for Brazil."]
+          : transcriptOptions[seed],
       status: "analyzing",
       amountCents: 0,
       createdAt: now.toISOString(),
@@ -175,95 +206,189 @@ export const useFairModel = create<FairModelState>((set, get) => ({
       eventPulse: state.eventPulse + 1,
     }));
 
-    const status = kind === "breach" ? "breach" : await analyzeGeneration(generation);
-    const amountCents = status === "breach"
-      ? generation.durationSeconds * 5
-      : status === "overage"
-        ? (generation.durationSeconds - 30) * 5 + 150
-        : Math.max(50, Math.round(generation.durationSeconds * 5));
+    const status =
+      kind === "breach" ? "breach" : await analyzeGeneration(generation);
+    const amountCents =
+      status === "breach" ? 0 : sampleRoyaltyCents(generation.durationSeconds);
     const analyzed = { ...generation, status, amountCents };
     set((state) => ({
-      generations: state.generations.map((item) => item.id === id ? analyzed : item),
+      generations: state.generations.map((item) =>
+        item.id === id ? analyzed : item,
+      ),
       breachActive: status === "breach",
       eventPulse: state.eventPulse + 1,
-      notify: status === "breach"
-        ? "Scope breach detected. No charge is created without talent review."
-        : status === "overage"
-          ? "Overage tier reached. Review the proposed royalty."
-          : "Usage is within scope. Review the estimated royalty.",
+      notify:
+        status === "breach"
+          ? "Scope breach detected. No charge is created without talent review."
+          : status === "overage"
+            ? "Overage tier reached. Review the proposed royalty."
+            : "Usage is within scope. Review the estimated royalty.",
     }));
-    if (status === "breach") {
-      const invoice = await createInvoice(analyzed);
-      set((state) => ({ invoices: [invoice, ...state.invoices] }));
-    }
     return id;
   },
-  approveGeneration: (id) => set((state) => ({
-    generations: state.generations.map((item) => item.id === id ? { ...item, artistApproved: true } : item),
-    invoices: state.invoices.map((item) => item.generationId === id && item.status === "REVIEW_REQUIRED"
-      ? { ...item, status: "APPROVED" }
-      : item),
-    notify: "Talent review recorded. This demo moves no funds.",
-  })),
-  approveInvoice: (id) => set((state) => ({
-    invoices: state.invoices.map((invoice) => invoice.id === id ? { ...invoice, status: "APPROVED" } : invoice),
-    notify: "Invoice approved in the local demo.",
-  })),
+  approveGeneration: async (id) => {
+    const generation = get().generations.find((item) => item.id === id);
+    if (
+      get().role !== "talent" ||
+      !generation ||
+      !["approved", "overage"].includes(generation.status)
+    ) {
+      set({
+        notify:
+          "Only talent can approve permitted sample usage. Restricted usage remains held.",
+      });
+      return;
+    }
+    set((state) => ({
+      generations: state.generations.map((item) =>
+        item.id === id ? { ...item, artistApproved: true } : item,
+      ),
+      notify:
+        "Fictional talent review recorded. No real artist attestation or payment occurred.",
+    }));
+    if (
+      generation.amountCents <= 0 ||
+      creatingInvoices.has(id) ||
+      get().invoices.some((item) => item.generationId === id)
+    )
+      return;
+    creatingInvoices.add(id);
+    try {
+      const invoice = await createInvoice({
+        ...generation,
+        artistApproved: true,
+      });
+      set((state) => ({
+        invoices: [{ ...invoice, status: "APPROVED" }, ...state.invoices],
+      }));
+    } finally {
+      creatingInvoices.delete(id);
+    }
+  },
+  approveInvoice: (id) => {
+    const invoice = get().invoices.find((item) => item.id === id);
+    const generation = get().generations.find(
+      (item) => item.id === invoice?.generationId,
+    );
+    if (
+      get().role !== "talent" ||
+      !invoice ||
+      invoice.status !== "REVIEW_REQUIRED" ||
+      !generation?.artistApproved ||
+      !["approved", "overage"].includes(generation.status)
+    )
+      return;
+    set((state) => ({
+      invoices: state.invoices.map((item) =>
+        item.id === id ? { ...item, status: "APPROVED" } : item,
+      ),
+      notify: "Invoice approved in the local simulation.",
+    }));
+  },
   releasePayout: async (id) => {
     const invoice = get().invoices.find((item) => item.id === id);
-    if (!invoice || invoice.status !== "APPROVED") return;
-    const transactionId = await sendPayout(invoice);
+    const generation = get().generations.find(
+      (item) => item.id === invoice?.generationId,
+    );
+    if (
+      get().role !== "talent" ||
+      !invoice ||
+      invoice.status !== "APPROVED" ||
+      !generation?.artistApproved ||
+      !["approved", "overage"].includes(generation.status)
+    )
+      return;
+    // Claim this sample transition before awaiting; repeated clicks cannot settle it twice.
     set((state) => ({
-      invoices: state.invoices.map((item) => item.id === id
-        ? { ...item, status: "PAID_SIMULATED", transactionId }
-        : item),
-      generations: state.generations.map((item) => item.id === invoice.generationId
-        ? { ...item, artistApproved: true }
-        : item),
+      invoices: state.invoices.map((item) =>
+        item.id === id ? { ...item, status: "SENT" } : item,
+      ),
+    }));
+    const transactionId = await sendPayout({ ...invoice, status: "SENT" });
+    set((state) => ({
+      invoices: state.invoices.map((item) =>
+        item.id === id
+          ? { ...item, status: "PAID_SIMULATED", transactionId }
+          : item,
+      ),
+      generations: state.generations.map((item) =>
+        item.id === invoice.generationId
+          ? { ...item, artistApproved: true }
+          : item,
+      ),
       notify: `Simulated payout ${transactionId} recorded. No funds transferred.`,
     }));
   },
   releaseBatch: async (ids) => {
-    const selected = get().generations.filter((item) => ids.includes(item.id) && item.artistApproved);
+    if (get().role !== "talent") return;
+    const selected = get().generations.filter(
+      (item) =>
+        ids.includes(item.id) &&
+        item.artistApproved &&
+        ["approved", "overage"].includes(item.status) &&
+        item.amountCents > 0,
+    );
     if (!selected.length) return;
-    const settled: Invoice[] = [];
+    let settled = 0;
     for (const generation of selected) {
-      const invoice = await createInvoice(generation);
-      const transactionId = await sendPayout(invoice);
-      settled.push({ ...invoice, status: "PAID_SIMULATED", transactionId });
+      await get().approveGeneration(generation.id);
+      const invoice = get().invoices.find(
+        (item) =>
+          item.generationId === generation.id && item.status === "APPROVED",
+      );
+      if (invoice) {
+        await get().releasePayout(invoice.id);
+        settled += 1;
+      }
     }
-    set((state) => ({
-      invoices: [...settled, ...state.invoices],
-      generations: state.generations.map((item) => ids.includes(item.id)
-        ? { ...item, artistApproved: true }
-        : item),
-      notify: `Recorded ${settled.length} simulated payout${settled.length === 1 ? "" : "s"}. No funds transferred.`,
-    }));
+    set({
+      notify: `Recorded ${settled} simulated payout${settled === 1 ? "" : "s"}. No funds transferred.`,
+    });
   },
   runDemo: () => {
     get().stopDemo();
-    set({ demoRunning: true, demoElapsed: 0, screen: "contract", notify: "60-second story started." });
+    set({
+      demoRunning: true,
+      demoElapsed: 0,
+      screen: "contract",
+      notify: "60-second story started.",
+    });
     get().ingestContract();
     demoTimers.push(setTimeout(() => get().completeContract(), 1_800));
-    demoTimers = [
+    demoTimers.push(
       setTimeout(() => void get().createGeneration("normal"), 3_000),
       setTimeout(() => void get().createGeneration("normal"), 10_000),
       setTimeout(() => void get().createGeneration("overage"), 18_000),
       setTimeout(() => void get().createGeneration("normal"), 27_000),
       setTimeout(() => void get().createGeneration("breach"), 38_000),
       setTimeout(() => {
-        const breach = get().generations.find((item) => item.status === "breach" && !item.artistApproved);
-        if (breach) get().approveGeneration(breach.id);
+        const permitted = get().generations.find(
+          (item) => item.status === "overage" && !item.artistApproved,
+        );
+        if (permitted) void get().approveGeneration(permitted.id);
         set({ screen: "ledger" });
       }, 48_000),
       setTimeout(() => {
-        const invoice = get().invoices.find((item) => item.status === "APPROVED");
+        const invoice = get().invoices.find(
+          (item) => item.status === "APPROVED",
+        );
         if (invoice) void get().releasePayout(invoice.id);
       }, 53_000),
-      setTimeout(() => set({ demoRunning: false, demoElapsed: 60, screen: "ledger", notify: "Demo story complete. Explore the ledger or replay." }), 60_000),
-    ];
+      setTimeout(
+        () =>
+          set({
+            demoRunning: false,
+            demoElapsed: 60,
+            screen: "ledger",
+            notify: "Demo story complete. Explore the ledger or replay.",
+          }),
+        60_000,
+      ),
+    );
     for (let second = 1; second <= 60; second += 1) {
-      demoTimers.push(setTimeout(() => set({ demoElapsed: second }), second * 1000));
+      demoTimers.push(
+        setTimeout(() => set({ demoElapsed: second }), second * 1000),
+      );
     }
   },
   stopDemo: () => {
@@ -276,15 +401,22 @@ export const useFairModel = create<FairModelState>((set, get) => ({
 export function startSimulationEngine() {
   if (engineTimer) return;
   const scheduleGeneration = () => {
-    engineTimer = setTimeout(() => {
-      const { demoRunning } = useFairModel.getState();
-      if (!demoRunning) void useFairModel.getState().createGeneration(Math.random() < 0.18 ? "overage" : "normal");
-      scheduleGeneration();
-    }, 3_000 + Math.random() * 3_000);
+    engineTimer = setTimeout(
+      () => {
+        const { demoRunning } = useFairModel.getState();
+        if (!demoRunning)
+          void useFairModel
+            .getState()
+            .createGeneration(Math.random() < 0.18 ? "overage" : "normal");
+        scheduleGeneration();
+      },
+      3_000 + Math.random() * 3_000,
+    );
   };
   const scheduleBreach = () => {
     breachTimer = setTimeout(() => {
-      if (!useFairModel.getState().demoRunning) void useFairModel.getState().createGeneration("breach");
+      if (!useFairModel.getState().demoRunning)
+        void useFairModel.getState().createGeneration("breach");
       scheduleBreach();
     }, 40_000);
   };
@@ -297,4 +429,5 @@ export function stopSimulationEngine() {
   if (breachTimer) clearTimeout(breachTimer);
   engineTimer = undefined;
   breachTimer = undefined;
+  useFairModel.getState().stopDemo();
 }

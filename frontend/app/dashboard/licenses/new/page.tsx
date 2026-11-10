@@ -1,7 +1,8 @@
 "use client";
+import FileDropzone from "@/components/file-dropzone";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, FileText, Upload } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 import {
   BusyButton,
   ErrorPanel,
@@ -31,6 +32,7 @@ export default function NewLicense() {
         <ErrorPanel message="Switch to Artist view to create an agreement." />
       ) : (
         <form
+          aria-busy={busy}
           className="panel form-panel"
           onSubmit={(e) => {
             e.preventDefault();
@@ -82,18 +84,15 @@ export default function NewLicense() {
             label="Licensing agreement PDF"
             hint="Text PDF · up to 30 pages · 24 MiB max. Scanned PDFs require OCR."
           >
-            <span className="upload-zone">
-              <Upload size={26} />
-              <strong>{file?.name || "Choose a licensing agreement"}</strong>
-              <span>Source pages are preserved for your review.</span>
-              <input
-                aria-label="Licensing agreement PDF"
-                type="file"
-                accept=".pdf,application/pdf"
-                required
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-            </span>
+            <FileDropzone
+              label="Licensing agreement PDF"
+              accept=".pdf,application/pdf"
+              extensions={[".pdf"]}
+              file={file}
+              onChange={setFile}
+              disabled={busy}
+              note="Text PDF · up to 24 MiB. Source pages stay available for review."
+            />
           </Field>
           <div className="alert info">
             Trying the local workflow?{" "}
@@ -106,6 +105,12 @@ export default function NewLicense() {
             <p className="muted">
               Draft saved. You can retry this upload without creating another
               license.
+            </p>
+          )}
+          {busy && (
+            <p className="upload-pending" role="status">
+              Uploading your file and validating its contents. Keep this page
+              open. Analysis starts separately.
             </p>
           )}
           {error && <ErrorPanel message={error} />}

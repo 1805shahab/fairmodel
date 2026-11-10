@@ -1,7 +1,8 @@
 "use client";
+import FileDropzone from "@/components/file-dropzone";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Upload } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   BusyButton,
   ErrorPanel,
@@ -33,6 +34,7 @@ export default function NewSubmission() {
         <ErrorPanel message="Switch to Studio view to upload a campaign asset." />
       ) : (
         <form
+          aria-busy={busy}
           className="panel form-panel"
           onSubmit={(e) => {
             e.preventDefault();
@@ -76,18 +78,15 @@ export default function NewSubmission() {
             label="Campaign audio"
             hint="WAV, MP3, M4A · 24 MiB max · 10 minutes max · single speaker and audio track."
           >
-            <span className="upload-zone">
-              <Upload size={25} />
-              <strong>{file?.name || "Choose campaign audio"}</strong>
-              <span>File content is validated with ffprobe.</span>
-              <input
-                aria-label="Campaign audio"
-                type="file"
-                accept=".wav,.mp3,.m4a"
-                required
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-            </span>
+            <FileDropzone
+              label="Campaign audio"
+              accept=".wav,.mp3,.m4a"
+              extensions={[".wav", ".mp3", ".m4a"]}
+              file={file}
+              onChange={setFile}
+              disabled={busy}
+              note="WAV, MP3 or M4A · up to 24 MiB. Validated by ffprobe."
+            />
           </Field>
           <div className="alert info">
             <span>
@@ -99,6 +98,12 @@ export default function NewSubmission() {
               the sample license. Audio cannot verify distribution geography.
             </span>
           </div>
+          {busy && (
+            <p className="upload-pending" role="status">
+              Uploading your file and validating its contents. Keep this page
+              open. Analysis starts separately.
+            </p>
+          )}
           {error && <ErrorPanel message={error} />}
           <div className="form-footer">
             <span className="small">Analysis runs after upload.</span>

@@ -1,7 +1,12 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Bloom, ChromaticAberration, EffectComposer, Vignette } from "@react-three/postprocessing";
+import {
+  Bloom,
+  ChromaticAberration,
+  EffectComposer,
+  Vignette,
+} from "@react-three/postprocessing";
 import { OrbitControls, Sparkles } from "@react-three/drei";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
@@ -73,7 +78,9 @@ function VoicePoints() {
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uAudio.value = state.audioLevel;
     material.uniforms.uBreach.value = state.breachActive ? 1 : 0;
-    material.uniforms.uPulse.value = Math.max(0, 1 - ((Date.now() % 1100) / 1100)) * (state.eventPulse ? 0.18 : 0);
+    material.uniforms.uPulse.value =
+      Math.max(0, 1 - (Date.now() % 1100) / 1100) *
+      (state.eventPulse ? 0.18 : 0);
     if (pointsRef.current) {
       const target = state.breachActive ? 0.72 : 0;
       pointsRef.current.rotation.y += 0.002 + state.audioLevel * 0.008;
@@ -83,7 +90,9 @@ function VoicePoints() {
         1.2,
         1 / 60,
       );
-      const scale = state.breachActive ? 0.92 : 1 + Math.sin(clock.elapsedTime * 1.1) * 0.018;
+      const scale = state.breachActive
+        ? 0.92
+        : 1 + Math.sin(clock.elapsedTime * 1.1) * 0.018;
       pointsRef.current.scale.setScalar(scale);
     }
   });
@@ -156,17 +165,46 @@ function OrbWorld() {
     <>
       <fog attach="fog" args={["#090711", 4, 9]} />
       <ambientLight intensity={0.28} />
-      <pointLight position={[2, 1.2, 2]} color={breach ? "#ff3155" : "#a483ff"} intensity={breach ? 4 : 2.4} />
+      <pointLight
+        position={[2, 1.2, 2]}
+        color={breach ? "#ff3155" : "#a483ff"}
+        intensity={breach ? 4 : 2.4}
+      />
       <pointLight position={[-2, -1, 1]} color="#22e5ff" intensity={1.5} />
       <group>
         <LicenseShell />
         <VoicePoints />
       </group>
-      <Sparkles count={70} scale={4.5} size={1.6} speed={0.15} color={breach ? "#ff536b" : "#8b5cff"} />
-      <OrbitControls enablePan={false} minDistance={3.7} maxDistance={5.5} minPolarAngle={1.1} maxPolarAngle={2.1} rotateSpeed={0.25} />
+      <Sparkles
+        count={70}
+        scale={4.5}
+        size={1.6}
+        speed={0.15}
+        color={breach ? "#ff536b" : "#8b5cff"}
+      />
+      <OrbitControls
+        enablePan={false}
+        minDistance={3.7}
+        maxDistance={5.5}
+        minPolarAngle={1.1}
+        maxPolarAngle={2.1}
+        rotateSpeed={0.25}
+      />
       <EffectComposer multisampling={0}>
-        <Bloom intensity={breach ? 2.2 : 1.15} luminanceThreshold={0.1} luminanceSmoothing={0.8} mipmapBlur />
-        <ChromaticAberration offset={new THREE.Vector2(breach ? 0.003 : 0.00045, breach ? 0.003 : 0.00045)} />
+        <Bloom
+          intensity={breach ? 2.2 : 1.15}
+          luminanceThreshold={0.1}
+          luminanceSmoothing={0.8}
+          mipmapBlur
+        />
+        <ChromaticAberration
+          offset={
+            new THREE.Vector2(
+              breach ? 0.003 : 0.00045,
+              breach ? 0.003 : 0.00045,
+            )
+          }
+        />
         <Vignette eskil={false} offset={0.16} darkness={0.76} />
       </EffectComposer>
     </>
@@ -185,16 +223,23 @@ export default function OrbScene({
   const audioLevel = useFairModel((state) => state.audioLevel);
   const [canvasEnabled] = useState(() => {
     if (typeof window === "undefined") return false;
-    const mobile = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const lowPower = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency < 4;
+    const mobile = window.matchMedia(
+      "(max-width: 760px), (pointer: coarse)",
+    ).matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const lowPower =
+      navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency < 4;
     return !mobile && !reduced && !lowPower;
   });
   return (
     <div
       className={`orb-scene ${compact ? "orb-scene-compact" : ""} ${className}`}
       style={{ "--audio-level": audioLevel } as React.CSSProperties}
-      onPointerEnter={() => setAudioLevel(Math.max(useFairModel.getState().audioLevel, 0.08))}
+      onPointerEnter={() =>
+        setAudioLevel(Math.max(useFairModel.getState().audioLevel, 0.08))
+      }
       onPointerLeave={() => setAudioLevel(0)}
     >
       <div className="orb-static-fallback" aria-hidden="true" />
@@ -209,9 +254,11 @@ export default function OrbScene({
           <OrbWorld />
         </Canvas>
       ) : null}
-      <span className="orb-tag orb-tag-top">VOICEPRINT · 99.2%</span>
+      <span className="orb-tag orb-tag-top">IDENTITY · NOT VERIFIED</span>
       <span className="orb-tag orb-tag-bottom">
-        {useFairModel.getState().contractVerified ? "LICENSE · ACTIVE" : "VOICE SIGNATURE · LIVE"}
+        {useFairModel.getState().contractVerified
+          ? "SAMPLE LICENSE"
+          : "FICTIONAL VOICE VISUAL"}
       </span>
     </div>
   );

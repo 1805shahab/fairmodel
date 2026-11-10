@@ -13,6 +13,7 @@ def campaign(**overrides):
         region="US",
         medium="online advertising",
         language="English",
+        category="consumer products",
         intended_use_date="2026-11-06",
     ).model_copy(update=overrides)
 

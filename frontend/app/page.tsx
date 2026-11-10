@@ -4,155 +4,141 @@ import {
   ArrowUpRight,
   AudioLines,
   Check,
-  FileCheck2,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
+import VoiceSculpture from "@/components/voice-sculpture";
+import ProductWalkthrough from "@/components/product-walkthrough";
 
-export default function Landing() {
+// FairModel has one application. The former landing/preview fork is retired.
+export default function Home() {
   return (
-    <main className="landing">
-      <nav className="landing-nav">
-        <Link className="brand" href="/">
+    <div className="landing-control rights-landing">
+      <a className="rights-skip" href="#rights-main">
+        Skip to content
+      </a>
+      <header className="rights-nav">
+        <Link className="brand" href="/" aria-label="FairModel home">
           <span className="brand-icon">
-            <AudioLines size={22} />
+            <AudioLines size={23} />
           </span>
           fairmodel<span className="brand-dot">.</span>
         </Link>
-        <span className="small hide-mobile">VOICE RIGHTS. MADE RIGHT.</span>
-        <Link className="button secondary" href="/control-room">
-          Open control room <ArrowRight size={16} />
+        <a className="rights-nav-explore" href="#how-it-works">
+          How it works
+        </a>
+        <Link className="button secondary" href="/dashboard">
+          Open workspace <ArrowUpRight size={17} />
         </Link>
-      </nav>
-      <section className="landing-hero">
-        <div className="landing-copy">
-          <span className="eyebrow">
-            <span className="live-dot" /> A FAIRER FUTURE FOR CREATOR VOICES
-          </span>
-          <h1>
-            Every voice
-            <br />
-            deserves a <span>fair share.</span>
-          </h1>
-          <p>
-            Make AI voice licensing easier to understand—from source-backed
-            terms to transparent royalties artists approve.
-          </p>
-          <div className="button-row">
-            <Link className="button" href="/control-room">
-              Open control room <ArrowRight size={17} />
-            </Link>
-            <Link className="text-link" href="/dashboard/settings">
-              See how the demo works <ArrowUpRight size={15} />
+      </header>
+      <main id="rights-main">
+        <section
+          className="rights-hero"
+          aria-labelledby="rights-title"
+          data-enter
+        >
+          <div className="rights-hero-copy">
+            <span className="eyebrow">
+              VOICE LICENSING, WITH THE ARTIST IN CONTROL
+            </span>
+            <h1 id="rights-title">
+              Your voice.
+              <br />
+              Your <em>rights.</em>
+              <br />
+              Your royalties.
+            </h1>
+            <p>
+              Turn permission into a clear path to payment. Review AI voice
+              usage against your terms, measure the speech, and approve every
+              charge.
+            </p>
+            <div className="rights-hero-actions">
+              <Link className="button" href="/dashboard">
+                Open workspace <ArrowRight size={18} />
+              </Link>
+              <a href="#how-it-works">
+                Follow the workflow <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+            <div className="rights-hero-fact">
+              <ShieldCheck size={17} />
+              <span>Artist review before activation and invoicing.</span>
+            </div>
+          </div>
+          <VoiceSculpture />
+        </section>
+        <section
+          className="rights-story"
+          id="how-it-works"
+          aria-labelledby="workflow-heading"
+        >
+          <div className="rights-section-heading">
+            <span className="eyebrow">ONE CONNECTED WORKSPACE</span>
+            <h2 id="workflow-heading">
+              From a clause
+              <br />
+              to a clear decision.
+            </h2>
+            <p>
+              Artists and studios share the evidence. Each keeps the decisions
+              that belong to them.
+            </p>
+          </div>
+          <ProductWalkthrough />
+        </section>
+        <section className="rights-trust" aria-labelledby="trust-heading">
+          <div>
+            <span className="eyebrow">BUILT FOR ACCOUNTABILITY</span>
+            <h2 id="trust-heading">
+              Every finding,
+              <br />
+              open to <em>question.</em>
+            </h2>
+            <p>
+              AI assists the review. Approved terms, measured usage and recorded
+              human decisions determine what happens next.
+            </p>
+            <Link className="button" href="/dashboard">
+              Open workspace <ArrowRight size={18} />
             </Link>
           </div>
-          <div className="landing-trust">
-            <span>
-              <ShieldCheck size={15} /> Human approval stays in control
-            </span>
-            <span>
-              <AudioLines size={15} /> Usage explained, not guessed
-            </span>
-          </div>
-        </div>
-        <div className="landing-art" aria-label="FairModel workflow preview">
-          <div className="art-glow" />
-          <div className="art-orbit orbit-one" />
-          <div className="art-orbit orbit-two" />
-          <div className="art-wave" aria-hidden="true">
-            {Array.from({ length: 31 }, (_, i) => (
-              <span
-                key={i}
-                style={
-                  {
-                    "--wave-height": `${18 + Math.abs(Math.sin(i * 0.63)) * (i % 7 === 0 ? 72 : 38)}px`,
-                    "--wave-delay": `${i * 22}ms`,
-                  } as React.CSSProperties
-                }
-              />
+          <div className="rights-trust-list">
+            {[
+              [
+                "Evidence you can inspect",
+                "PDF source clauses, transcript timestamps and measured speech intervals.",
+              ],
+              [
+                "Math you can follow",
+                "Deterministic royalty calculations using the approved allowance and rate.",
+              ],
+              [
+                "Identity stated honestly",
+                "Manual artist attestation is separate from optional speaker verification.",
+              ],
+              [
+                "Payments labeled clearly",
+                "PayPal Sandbox uses test funds. Local mock payments are simulations. Neither transfers real money.",
+              ],
+            ].map(([title, text]) => (
+              <article key={title}>
+                <Check size={19} />
+                <div>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </div>
+              </article>
             ))}
           </div>
-          <div className="art-label">
-            <span className="art-label-icon">
-              <AudioLines size={17} />
-            </span>
-            <span>
-              <strong>Voice rights, made clear.</strong>
-              <small>Terms · Usage · Artist approval</small>
-            </span>
-            <Sparkles size={16} />
-          </div>
-          <div className="art-review">
-            <div className="art-review-top">
-              <span className="art-check">
-                <Check size={15} />
-              </span>
-              <span>
-                <strong>Ready for artist review</strong>
-                <small>Evidence first. People decide.</small>
-              </span>
-              <span className="art-status">REVIEW</span>
-            </div>
-            <div className="art-review-rule" />
-            <div className="art-review-bottom">
-              <span>Agreement terms</span>
-              <span>Usage evidence</span>
-              <span>Royalty approval</span>
-            </div>
-          </div>
-          <span className="art-caption">
-            BUILT FOR CLEARER COLLABORATION
-          </span>
-        </div>
-      </section>
-      <section className="landing-preview">
-        <div className="preview-header">
-          <div>
-            <span className="eyebrow">A BETTER WAY TO WORK TOGETHER</span>
-            <h2>Clarity at every step.</h2>
-          </div>
-          <span className="pill blue">Human-approved by design</span>
-        </div>
-        <div className="workflow-cards">
-          {[
-            {
-              Icon: FileCheck2,
-              n: "01",
-              title: "Set the terms",
-              text: "Turn a licensing PDF into structured rules, with source evidence and artist review.",
-            },
-            {
-              Icon: AudioLines,
-              n: "02",
-              title: "Understand every second",
-              text: "Measure speech, transcribe audio, and evaluate declared campaign usage.",
-            },
-            {
-              Icon: ShieldCheck,
-              n: "03",
-              title: "Make fairness measurable",
-              text: "Explain every royalty. Approve each charge. Follow every simulated invoice.",
-            },
-          ].map(({ Icon, n, title, text }) => (
-            <article key={n}>
-              <div className="step-top">
-                <Icon size={25} />
-                <span>{n}</span>
-              </div>
-              <h2>{title}</h2>
-              <p>{text}</p>
-            </article>
-          ))}
-        </div>
-        <div className="preview-footer">
-          <Sparkles size={16} /> Powered by Gemini + Groq when configured. Demo
-          fixtures are explicitly labeled.
-        </div>
-      </section>
-      <footer className="landing-footer">
-        <span>FairModel © 2026</span>
-        <span>Demo payments are simulated. No real funds are transferred.</span>
+        </section>
+      </main>
+      <footer className="rights-footer">
+        <span>fairmodel. Every voice deserves a fair share.</span>
+        <Link href="/dashboard/settings">
+          Integrations & local access <ArrowUpRight size={14} />
+        </Link>
+        <span>Local role access · test payments only</span>
       </footer>
-    </main>
+    </div>
   );
 }

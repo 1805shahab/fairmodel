@@ -1,3 +1,25 @@
+.experience-notice {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 24px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #ffffff20;
+  background: #110f1b;
+  color: #d8d2e7;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.experience-notice a {
+  color: #2cffb0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .experience-shell {
   --font-space-grotesk: "Space Grotesk";
   --font-jetbrains-mono: "JetBrains Mono";

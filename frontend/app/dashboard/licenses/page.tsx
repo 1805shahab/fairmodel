@@ -10,7 +10,6 @@ import {
   useData,
 } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
-import { date } from "@/components/api";
 import type { License } from "@/components/types";
 
 export default function Licenses() {
@@ -52,9 +51,9 @@ export default function Licenses() {
               <thead>
                 <tr>
                   <th>AGREEMENT</th>
-                  <th>VERSION</th>
-                  <th>EXTRACTION SOURCE</th>
-                  <th>CREATED</th>
+                  <th>PARTIES</th>
+                  <th>VALIDITY</th>
+                  <th>INCLUDED USAGE</th>
                   <th>STATUS</th>
                   <th />
                 </tr>
@@ -70,12 +69,35 @@ export default function Licenses() {
                         <span className="file-icon">
                           <FileText size={20} />
                         </span>
-                        <strong>{x.title}</strong>
+                        <span>
+                          <strong>{x.title}</strong>
+                          <small>
+                            Version {x.version} · {x.extraction_provider}
+                          </small>
+                        </span>
                       </Link>
                     </td>
-                    <td>v{x.version}</td>
-                    <td className="muted">{x.extraction_provider}</td>
-                    <td className="muted nowrap">{date(x.created_at)}</td>
+                    <td>
+                      {x.terms.artist || "Artist unknown"}
+                      <small className="cell-subtitle">
+                        {x.terms.studio || "Studio unknown"}
+                      </small>
+                    </td>
+                    <td className="nowrap">
+                      {x.terms.start_date || "Start unknown"}
+                      <small className="cell-subtitle">
+                        to {x.terms.end_date || "end unknown"}
+                      </small>
+                    </td>
+                    <td>
+                      {x.terms.included_seconds != null
+                        ? `${x.terms.included_seconds}s`
+                        : "Unknown"}
+                      <small className="cell-subtitle">
+                        {x.terms.billing_basis?.replaceAll("_", " ") ||
+                          "Basis unknown"}
+                      </small>
+                    </td>
                     <td>
                       <Badge status={x.status} />
                     </td>

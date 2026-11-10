@@ -43,5 +43,8 @@ export function date(value: string) {
   }).format(new Date(value));
 }
 export function statusLabel(status: string) {
+  if (status === "PAID") return "paid (Sandbox)";
+  if (status === "INVOICE_PAID") return "invoice paid (Sandbox)";
+  if (status === "ANALYZED") return "audio analyzed";
   return status.toLowerCase().replaceAll("_", " ");
 }

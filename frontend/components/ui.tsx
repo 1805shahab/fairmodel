@@ -43,7 +43,9 @@ export function Badge({ status }: { status: string }) {
     "COMPLIANT",
     "NO_CHARGE",
     "PAID_SIMULATED",
-    "ANALYZED",
+    "artist_confirmed",
+    "ROYALTY_APPROVED",
+    "PAID",
   ].includes(status)
     ? "green"
     : [
@@ -52,11 +54,17 @@ export function Badge({ status }: { status: string }) {
           "REVIEW",
           "ADDITIONAL_ROYALTY_DUE",
           "SENT",
+          "PAYMENT_PENDING",
+          "PARTIALLY_PAID",
+          "unresolved",
+          "stale",
         ].includes(status)
       ? "amber"
       : ["RESTRICTED_USAGE", "FAILED", "REJECTED"].includes(status)
         ? "red"
-        : "slate";
+        : ["ANALYZED", "PROCESSING", "UPLOADED", "DRAFT"].includes(status)
+          ? "blue"
+          : "slate";
   return (
     <span className={`pill ${color}`}>
       <span className="status-dot" />
@@ -110,7 +118,7 @@ export function ErrorPanel({
 }
 export function Loading() {
   return (
-    <div className="loading" role="status">
+    <div className="loading loading-skeleton" role="status" aria-live="polite">
       <LoaderCircle className="spin" size={22} />
       Loading your workspace…
     </div>
@@ -173,6 +181,7 @@ export function BusyButton({
   return (
     <button
       {...props}
+      aria-busy={busy}
       disabled={busy || props.disabled}
       className={props.className || "button"}
     >

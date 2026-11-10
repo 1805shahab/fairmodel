@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .db import Invoice, PaymentEvent, Persona, Royalty, uid
+from .db import Invoice, PaymentEvent, Persona, Royalty, SandboxInvoiceDetail, uid
 
 PAYMENT_NOTICE = "DEMO / SIMULATED PAYMENT — NO REAL FUNDS TRANSFERRED"
 
@@ -97,36 +97,88 @@ class MockPaymentProvider(PaymentProvider):
         return invoice
 
 
-class PayPalSandboxProvider(PaymentProvider):
-    """Intentionally non-operational. No OAuth, HTTP calls or fabricated provider responses.
+from .paypal_provider import PayPalSandboxProvider  # noqa: E402
+from .config import settings  # noqa: E402
+from .paypal_client import SANDBOX_NOTICE  # noqa: E402
 
-    Future adapter must map local approved royalties to Invoicing v2 with durable request IDs,
-    verify webhook signatures, reconcile invoice amounts/currencies, and deduplicate event IDs.
-    The manual simulate-payment route must remain mock-only when that adapter is enabled.
-    """
 
-    def __init__(self):
-        raise NotImplementedError(
-            "PayPal account access and explicit integration authorization are required."
+mock_provider = MockPaymentProvider()
+sandbox_provider = PayPalSandboxProvider()
+
+
+def provider_for(name):
+    if name == "mock":
+        return mock_provider
+    if name == "paypal_sandbox":
+        return sandbox_provider
+    raise HTTPException(409, "Unsupported stored payment provider; no fallback is allowed.")
+
+
+def payment_notice(invoice=None):
+    selected = invoice.provider if invoice else settings.payment_provider
+    return SANDBOX_NOTICE if selected == "paypal_sandbox" else PAYMENT_NOTICE
+
+
+def settled_amount(db, invoice):
+    if invoice.provider == "mock":
+        return Decimal(invoice.amount) if invoice.status == "PAID_SIMULATED" else Decimal("0")
+    if invoice.status not in {"PAID", "PARTIALLY_PAID", "REFUNDED", "PARTIALLY_REFUNDED"}:
+        return Decimal("0")
+    detail = db.scalar(select(SandboxInvoiceDetail).where(SandboxInvoiceDetail.invoice_id == invoice.id))
+    if not detail:
+        return Decimal("0")
+    # Only actual PayPal payment rows count as received test funds; never external/manual marks.
+    rows = [row for row in detail.transactions if row.get("type") == "PAYPAL" and row.get("payment_id")]
+    try:
+        paid = sum(
+            (
+                Decimal(row["amount"]["value"])
+                for row in rows
+                if row["amount"]["currency_code"] == invoice.currency
+            ),
+            Decimal("0"),
         )
+        if (
+            len({row["payment_id"] for row in rows}) != len(rows)
+            or not paid.is_finite()
+            or not 0 <= paid <= Decimal(invoice.amount)
+        ):
+            return Decimal("0")
+        return max(Decimal("0"), paid - Decimal(detail.refunded_amount))
+    except (KeyError, TypeError, ValueError, InvalidOperation):
+        return Decimal("0")
 
+
+def outstanding_amount(db, invoice):
+    """Remaining invoice debt, distinct from net receipts after refunds."""
+    if invoice.status in {"PAID_SIMULATED", "PAID", "CANCELLED", "REFUNDED"}:
+        return Decimal("0")
+    if invoice.provider == "paypal_sandbox":
+        detail = db.scalar(select(SandboxInvoiceDetail).where(SandboxInvoiceDetail.invoice_id == invoice.id))
+        if detail and detail.due_amount is not None:
+            return Decimal(detail.due_amount)
+    return max(Decimal("0"), Decimal(invoice.amount) - settled_amount(db, invoice))
+
+
+class PaymentRouter:
     def create_invoice(self, session, royalty):
-        raise NotImplementedError
-
-    def send_invoice(self, session, invoice, actor, event_key):
-        raise NotImplementedError
-
-    def get_invoice(self, session, invoice_id):
-        raise NotImplementedError
+        return provider_for(settings.payment_provider).create_invoice(session, royalty)
 
     def list_invoices(self, session, actor):
-        raise NotImplementedError
+        return mock_provider.list_invoices(session, actor)
+
+    def send_invoice(self, session, invoice, actor, event_key):
+        return provider_for(invoice.provider).send_invoice(session, invoice, actor, event_key)
+
+    def get_invoice(self, session, invoice_id):
+        return mock_provider.get_invoice(session, invoice_id)
 
     def get_payment_status(self, session, invoice_id):
-        raise NotImplementedError
+        invoice = self.get_invoice(session, invoice_id)
+        return provider_for(invoice.provider).get_payment_status(session, invoice_id)
 
     def record_payment_event(self, session, invoice, actor, event_key, kind):
-        raise NotImplementedError
+        return provider_for(invoice.provider).record_payment_event(session, invoice, actor, event_key, kind)
 
 
-provider: PaymentProvider = MockPaymentProvider()
+provider = PaymentRouter()

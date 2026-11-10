@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "../components/experience/theme.css";
 
 .field > label {
   display: flex;
@@ -113,6 +112,50 @@ blockquote {
   font-size: 13px;
   line-height: 1.8;
   color: #50617a;
+}
+.workflow-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.workflow-strip > div {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+.workflow-strip > div > span:first-child {
+  display: block;
+  font-size: 11px;
+  color: #53647b;
+  margin-bottom: 10px;
+}
+.overlap-pair {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.overlap-pair .review-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.overlap-pair audio {
+  width: 100%;
+  max-width: 100%;
+  margin: 12px 0;
+}
+.overlap-pair p,
+.overlap-pair h3,
+.workflow-strip .pill {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .workflow-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .overlap-pair .review-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 code,
 .mono {

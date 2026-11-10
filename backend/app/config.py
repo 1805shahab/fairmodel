@@ -14,11 +14,15 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.1-flash-lite"
     groq_api_key: SecretStr = SecretStr("")
     groq_whisper_model: str = "whisper-large-v3-turbo"
-    payment_provider: Literal["mock", "paypal"] = "mock"
+    payment_provider: Literal["mock", "paypal_sandbox"] = "mock"
     paypal_client_id: SecretStr = SecretStr("")
     paypal_client_secret: SecretStr = SecretStr("")
     paypal_environment: Literal["sandbox"] = "sandbox"
     paypal_webhook_id: SecretStr = SecretStr("")
+    paypal_sandbox_merchant_email: str = ""
+    paypal_sandbox_buyer_email: str = ""
+    paypal_allow_drafts: bool = False
+    paypal_allow_sending: bool = False
     enable_speaker_verification: bool = False
     demo_mode: bool = True
     ffmpeg_binary: str = "ffmpeg"
@@ -31,8 +35,6 @@ class Settings(BaseSettings):
     def local_only(self):
         if not self.demo_mode:
             raise ValueError("Production authentication is not implemented. DEMO_MODE must remain true.")
-        if self.payment_provider != "mock":
-            raise ValueError("PayPal is intentionally deferred. PAYMENT_PROVIDER must be mock.")
         if not self.database_url.startswith("sqlite:///"):
             raise ValueError("This development schema supports local SQLite only.")
         return self

@@ -3,30 +3,50 @@ import {
   AllCommunityModule,
   ModuleRegistry,
   themeQuartz,
+  colorSchemeDark,
   type ColDef,
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Royalty } from "./types";
 import { money, statusLabel } from "./api";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
-const theme = themeQuartz.withParams({
-  accentColor: "#3563e9",
-  backgroundColor: "#ffffff",
-  borderColor: "#e8edf5",
-  headerBackgroundColor: "#f8fafc",
-  fontFamily: "Arial, sans-serif",
-  fontSize: 13,
-  headerFontSize: 11,
+const theme = themeQuartz.withPart(colorSchemeDark).withParams({
+  accentColor: "#94ddff",
+  backgroundColor: "#151d29",
+  foregroundColor: "#e1ecf6",
+  borderColor: "#2b3749",
+  headerBackgroundColor: "#101722",
+  headerTextColor: "#a6b7cd",
+  rowHoverColor: "#203248",
+  fontFamily: '"Segoe UI", sans-serif',
+  fontSize: 14,
+  headerFontSize: 12,
   rowHeight: 54,
   headerHeight: 44,
   wrapperBorder: false,
 });
 export default function AnalyticsGrid({ rows }: { rows: Royalty[] }) {
   const grid = useRef<AgGridReact<Royalty>>(null);
+  const [search, setSearch] = useState("");
   const columns = useMemo<ColDef<Royalty>[]>(
     () => [
+      { field: "artist_name", headerName: "ARTIST", minWidth: 160 },
+      { field: "studio_name", headerName: "STUDIO", minWidth: 170 },
+      { field: "campaign_name", headerName: "CAMPAIGN", minWidth: 220 },
+      { field: "license_title", headerName: "LICENSE", minWidth: 220 },
+      {
+        field: "compliance_status",
+        headerName: "LAST COMPLIANCE",
+        minWidth: 190,
+      },
+      { field: "invoice_status", headerName: "INVOICE STATUS", minWidth: 170 },
+      {
+        field: "payment_provider",
+        headerName: "PAYMENT PROVIDER",
+        minWidth: 170,
+      },
       {
         field: "id",
         headerName: "ROYALTY ID",
@@ -63,6 +83,20 @@ export default function AnalyticsGrid({ rows }: { rows: Royalty[] }) {
         minWidth: 170,
       },
       {
+        field: "received_amount",
+        headerName: "RECEIVED · TEST FUNDS",
+        valueGetter: (p) => Number(p.data?.received_amount || 0),
+        valueFormatter: (p) => money(p.value, p.data?.currency),
+        minWidth: 200,
+      },
+      {
+        field: "outstanding_amount",
+        headerName: "OUTSTANDING",
+        valueGetter: (p) => Number(p.data?.outstanding_amount || 0),
+        valueFormatter: (p) => money(p.value, p.data?.currency),
+        minWidth: 180,
+      },
+      {
         headerName: "SPEECH (SEC)",
         valueGetter: (p) => Number(p.data?.calculation.spoken_seconds),
         minWidth: 150,
@@ -83,14 +117,20 @@ export default function AnalyticsGrid({ rows }: { rows: Royalty[] }) {
   return (
     <>
       <div className="grid-toolbar">
-        <span className="small">
-          Sort, filter, and compare actual persisted royalty entries.
-        </span>
+        <label className="ledger-search">
+          Find in ledger
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Artist, studio, campaign or license…"
+          />
+        </label>
         <button
           className="button secondary small-button"
           onClick={() =>
             grid.current?.api.exportDataAsCsv({
-              fileName: "fairmodel-simulated-royalties.csv",
+              fileName: "fairmodel-provider-labeled-royalties.csv",
             })
           }
         >
@@ -102,6 +142,7 @@ export default function AnalyticsGrid({ rows }: { rows: Royalty[] }) {
           ref={grid}
           theme={theme}
           rowData={rows}
+          quickFilterText={search}
           columnDefs={columns}
           defaultColDef={{
             sortable: true,

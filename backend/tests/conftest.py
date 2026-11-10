@@ -7,11 +7,21 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-TEST_ROOT = tempfile.TemporaryDirectory(prefix="fairmodel-tests-")
+PROJECT = Path(__file__).resolve().parents[2]
+TEST_RUNS = PROJECT / ".tmp" / "pytest"
+TEST_RUNS.mkdir(parents=True, exist_ok=True)
+# A fresh owned directory avoids inaccessible shared Windows pytest directories
+# and keeps concurrent runs separate from one another and from application data.
+TEST_ROOT = tempfile.TemporaryDirectory(prefix="run-", dir=TEST_RUNS)
 os.environ["DATABASE_URL"] = "sqlite:///" + (Path(TEST_ROOT.name) / "lifespan.db").as_posix()
 os.environ["STORAGE_DIR"] = str(Path(TEST_ROOT.name) / "uploads")
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["GROQ_API_KEY"] = ""
+os.environ["PAYPAL_CLIENT_ID"] = ""
+os.environ["PAYPAL_CLIENT_SECRET"] = ""
+os.environ["PAYPAL_WEBHOOK_ID"] = ""
+os.environ["PAYPAL_ALLOW_DRAFTS"] = "false"
+os.environ["PAYPAL_ALLOW_SENDING"] = "false"
 os.environ["PAYMENT_PROVIDER"] = "mock"
 os.environ["DEMO_MODE"] = "true"
 
@@ -19,16 +29,30 @@ from app.config import settings  # noqa: E402
 from app.db import Base, engine, get_session  # noqa: E402
 from app.main import app  # noqa: E402
 
-PROJECT = Path(__file__).resolve().parents[2]
 ffprobes = list((PROJECT / "tools" / "ffmpeg-dist").glob("**/ffprobe.exe"))
 if ffprobes:
     settings.ffprobe_binary = str(ffprobes[0])
     settings.ffmpeg_binary = str(ffprobes[0].with_name("ffmpeg.exe"))
 
 
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
+    # Run before pytest builds its temporary-path factory. Never pass a shared
+    # runtime directory: pytest clears an explicit basetemp before using it.
+    if config.option.basetemp is None:
+        config.option.basetemp = str(Path(TEST_ROOT.name) / "cases")
+
+
 def pytest_sessionfinish(session, exitstatus):
     # Release SQLite handles before TemporaryDirectory cleanup on Windows.
     engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def backend_working_directory(monkeypatch):
+    # Match the supported runtime layout even when pytest starts at repo root.
+    # Restore afterward; do not change cwd during collection of CLI test paths.
+    monkeypatch.chdir(PROJECT / "backend")
 
 
 @pytest.fixture

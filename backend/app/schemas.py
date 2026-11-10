@@ -2,17 +2,23 @@ from datetime import date
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 
 class Schema(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    _provider_receipt: dict = PrivateAttr(default_factory=dict)
 
 
 class Evidence(Schema):
     field: str = Field(max_length=100)
     page: int = Field(ge=1)
     quote: str = Field(min_length=1, max_length=2000)
+
+
+class ResolvedEvidence(Evidence):
+    verified: bool = False
+    origin: str = "historical_unverified"
 
 
 class Terms(Schema):
@@ -76,6 +82,8 @@ class Finding(Schema):
     explanation: str
     possible_conflict: bool
     needs_review: bool
+    scope: Literal["content", "purpose"] = "content"
+    rule_id: str | None = None
 
 
 class ContentFindings(Schema):
@@ -90,10 +98,40 @@ class Decision(Schema):
 
 class PaymentCommand(Schema):
     event_key: str = Field(min_length=8, max_length=120, pattern=r"^[a-zA-Z0-9_-]+$")
+    confirm_sandbox: bool = False
 
 
 class ExtractionCommand(Schema):
     use_demo_fixture: bool = False
+    reprocess: bool = False
+
+
+class AuthorizationReview(Schema):
+    identity_confirmed: bool
+    use_authorized: bool
+    note: str = Field(min_length=10, max_length=2000)
+
+
+class OverlapDecision(Schema):
+    related_asset_id: str
+    decision: Literal["SAME_USAGE", "SEPARATE_USAGE", "UNCERTAIN"]
+    note: str = Field(min_length=10, max_length=2000)
+    expected_review_id: str | None = None
+
+
+class AuthorizationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    asset_id: str
+    artist_id: str
+    license_version: int
+    evidence_hash: str
+    identity_confirmed: bool
+    use_authorized: bool
+    note: str
+    created_at: str
+    updated_at: str
+    status: str = "unresolved"
 
 
 class ObjectResponse(BaseModel):
@@ -122,6 +160,7 @@ class LicenseResponse(ObjectResponse):
     error: str | None
     approved_at: str | None
     versions: list[dict] | None = None
+    source_review: dict | None = None
 
 
 class CalculationResponse(Schema):
@@ -149,6 +188,17 @@ class RoyaltyResponse(ObjectResponse):
     calculation: CalculationResponse
     decision_note: str | None
     decided_at: str | None
+    eligible_for_charge: bool = False
+    approval_current: bool = False
+    artist_name: str = ""
+    studio_name: str = ""
+    license_title: str = ""
+    campaign_name: str = ""
+    compliance_status: str = "PENDING"
+    invoice_status: str = "NOT_CREATED"
+    payment_provider: str = "NOT_CREATED"
+    received_amount: str = "0"
+    outstanding_amount: str = "0"
 
 
 class AudioResultResponse(BaseModel):
@@ -182,10 +232,39 @@ class ComplianceResponse(BaseModel):
     findings: ContentFindings
     provider: str
     license_version: int
-    source_pages: list[Evidence]
+    source_pages: list[ResolvedEvidence]
     metadata_note: str
     legal_note: str
     evaluated_on: str
+    eligible_for_charge: bool = False
+    policy_version: int = 0
+    transcription_provider: str = "unknown"
+    transcription_mode: str = "unknown"
+    assessment_fixture: bool = False
+    authorization: dict = Field(default_factory=dict)
+    terms_hash: str = ""
+    rule_checks: list[dict] = Field(default_factory=list)
+    substantiated_violations: list[dict] = Field(default_factory=list)
+    overlap: list[dict] = Field(default_factory=list)
+    source_review: dict = Field(default_factory=dict)
+    provider_receipt: dict = Field(default_factory=dict)
+    primary_reason: str = ""
+    next_action: str = ""
+    satisfied_conditions: list[dict] = Field(default_factory=list)
+    violated_conditions: list[dict] = Field(default_factory=list)
+    unresolved_conditions: list[str] = Field(default_factory=list)
+    billing_usage: dict | None = None
+    assessment_reused: bool = False
+
+
+class OverlapResponse(BaseModel):
+    asset_id: str
+    pairs: list[dict]
+    incoming: list[dict]
+    usage: dict | None
+    review: dict | None = None
+    created: bool = False
+    evaluation_refreshed: bool = False
 
 
 class ReportResponse(ObjectResponse):
@@ -206,6 +285,15 @@ class AssetResponse(ObjectResponse):
     analysis: AnalysisResponse | None = None
     report: ReportResponse | None = None
     royalty: RoyaltyResponse | None = None
+    authorization: AuthorizationResponse | None = None
+    processing_state: str = "UPLOADED"
+    compliance_state: str = "PENDING"
+    authorization_state: str = "unresolved"
+    royalty_state: str = "NOT_ALLOCATED"
+    invoice_state: str = "NOT_CREATED"
+    workflow_stage: str = "UPLOADED"
+    next_action: str = "Analyze the audio."
+    invoice: "InvoiceResponse | None" = None
 
 
 class InvoiceResponse(ObjectResponse):
@@ -218,9 +306,18 @@ class InvoiceResponse(ObjectResponse):
     recipient: str
     amount: str
     currency: str
-    status: Literal["DRAFT", "SENT", "PAID_SIMULATED"]
+    status: str
     notice: str
     events: list[dict] | None = None
+    eligible_for_send: bool = False
+    sandbox: dict | None = None
+
+
+class InvoiceCommand(BaseModel):
+    confirm_sandbox: bool = False
+    expected_amount: str | None = None
+    expected_currency: str | None = None
+    expected_recipient: str | None = None
 
 
 class ReferenceResponse(ObjectResponse):
@@ -247,3 +344,7 @@ class AnalyticsResponse(BaseModel):
     pending_approvals: int
     rows: list[RoyaltyResponse]
     notice: str
+    active_license_count: int = 0
+    outstanding_invoice_count: int = 0
+    included_usage_count: int = 0
+    review_queue: list[dict] = Field(default_factory=list)

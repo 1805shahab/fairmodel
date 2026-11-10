@@ -87,6 +87,40 @@ class Analysis(Record, Base):
     result: Mapped[dict] = mapped_column(JSON)
 
 
+class UsageAuthorization(Record, Base):
+    __tablename__ = "usage_authorizations"
+    asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), unique=True)
+    artist_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    license_version: Mapped[int]
+    evidence_hash: Mapped[str]
+    identity_confirmed: Mapped[bool]
+    use_authorized: Mapped[bool]
+    note: Mapped[str]
+
+
+class OverlapReview(Record, Base):
+    __tablename__ = "overlap_reviews"
+    asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), index=True)
+    related_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"))
+    license_id: Mapped[str] = mapped_column(ForeignKey("licenses.id"), index=True)
+    license_version: Mapped[int]
+    reviewer_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    decision: Mapped[str]
+    note: Mapped[str]
+    evidence_hash: Mapped[str]
+    canonical_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"))
+    previous_id: Mapped[str | None] = mapped_column(ForeignKey("overlap_reviews.id"))
+
+
+class RoyaltyApproval(Record, Base):
+    __tablename__ = "royalty_approvals"
+    __table_args__ = (UniqueConstraint("royalty_id", "evidence_hash"),)
+    royalty_id: Mapped[str] = mapped_column(ForeignKey("royalty_entries.id"))
+    artist_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    evidence_hash: Mapped[str]
+    note: Mapped[str]
+
+
 class Report(Record, Base):
     __tablename__ = "compliance_reports"
     asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), unique=True)
@@ -129,6 +163,49 @@ class PaymentEvent(Record, Base):
     kind: Mapped[str]
     actor_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
     simulated: Mapped[bool] = mapped_column(default=True)
+
+
+class SandboxInvoiceDetail(Record, Base):
+    __tablename__ = "sandbox_invoice_details"
+    invoice_id: Mapped[str] = mapped_column(ForeignKey("invoices.id"), unique=True)
+    merchant_key: Mapped[str]
+    issuer: Mapped[str]
+    invoice_number: Mapped[str]
+    provider_status: Mapped[str] = mapped_column(default="DRAFT")
+    payment_url: Mapped[str | None]
+    due_date: Mapped[str | None]
+    paid_amount: Mapped[str] = mapped_column(default="0.00")
+    due_amount: Mapped[str | None]
+    refunded_amount: Mapped[str] = mapped_column(default="0.00")
+    last_synced_at: Mapped[str | None]
+    provider_updated_at: Mapped[str | None]
+    error: Mapped[str | None]
+    transactions: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class PaymentOperation(Record, Base):
+    """Durable claim saved BEFORE a remote write; uncertain writes reconcile without replay."""
+
+    __tablename__ = "payment_operations"
+    __table_args__ = (UniqueConstraint("royalty_id", "provider", "kind"),)
+    royalty_id: Mapped[str] = mapped_column(ForeignKey("royalty_entries.id"))
+    provider: Mapped[str] = mapped_column(default="paypal_sandbox")
+    kind: Mapped[str]
+    state: Mapped[str] = mapped_column(default="PREPARED")
+    merchant_key: Mapped[str]
+    evidence_hash: Mapped[str]
+    payload: Mapped[dict] = mapped_column(JSON)
+    remote_id: Mapped[str | None]
+    error: Mapped[str | None]
+
+
+class WebhookReceipt(Record, Base):
+    __tablename__ = "paypal_webhook_receipts"
+    event_id: Mapped[str] = mapped_column(unique=True)
+    invoice_id: Mapped[str | None] = mapped_column(ForeignKey("invoices.id"))
+    event_type: Mapped[str]
+    state: Mapped[str] = mapped_column(default="VERIFIED")
+    error: Mapped[str | None]
 
 
 class Audit(Record, Base):
