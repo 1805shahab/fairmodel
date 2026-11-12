@@ -1,1 +1,3 @@
 * text=auto eol=lf
+# Preserve PDF bytes and cross-reference offsets across Windows checkouts.
+*.pdf binary

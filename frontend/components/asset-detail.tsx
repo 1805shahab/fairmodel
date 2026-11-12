@@ -25,6 +25,7 @@ import { Metric, Tabs, TabPanel } from "./product-ui";
 import SourceCitations from "./source-citations";
 import RecordingPlayer from "./recording-player";
 import OverlapReview from "./overlap-review";
+import EvidenceExplorer from "./evidence-explorer";
 import { PaymentModeNotice } from "./invoice-actions";
 import type { Asset, Campaign } from "./types";
 
@@ -93,13 +94,21 @@ function Analysis({
         title={asset.campaign.name}
         description={asset.original_name}
         action={
-          <Link
-            className="button secondary"
-            href={`/dashboard/licenses/${asset.license_id}`}
-          >
-            <FileText size={15} />
-            View license
-          </Link>
+          <div className="passport-actions">
+            <Link
+              className="button secondary"
+              href={`/dashboard/submissions/${asset.id}/passport`}
+            >
+              Voice usage passport
+            </Link>
+            <Link
+              className="button secondary"
+              href={`/dashboard/licenses/${asset.license_id}`}
+            >
+              <FileText size={15} />
+              View license
+            </Link>
+          </div>
         }
       />
       {asset.error && <ErrorPanel message={asset.error} />}
@@ -343,6 +352,20 @@ function Analysis({
         )}
       </TabPanel>
       <TabPanel group="recording" id="compliance" active={tab}>
+        {report && (
+          <EvidenceExplorer
+            report={report}
+            audio={result}
+            campaign={asset.campaign}
+            licenseId={asset.license_id}
+            onSeek={(seconds) => {
+              if (player.current) player.current.currentTime = seconds;
+              document
+                .getElementById("recording-player")
+                ?.scrollIntoView({ block: "center" });
+            }}
+          />
+        )}
         <div className="detail-toolbar">
           <button
             className="button secondary"

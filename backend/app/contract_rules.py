@@ -80,6 +80,22 @@ APPROVAL = {
     "the artist must approve additional royalties before an invoice is issued",
 }
 
+# Explicit supported financial meanings, not a substring exemption. Every clause
+# must match; an added restriction/exception keeps the entire condition in review.
+FINANCIAL_CLAUSES = {
+    "billable duration is measured spoken duration, not total recording length": "spoken_duration",
+    "silence and non-speech music are excluded": "spoken_duration",
+    "fractional spoken seconds are billed proportionally": "proportional_seconds",
+    "the final monetary amount is rounded to two decimal places using half_up rounding": "round_half_up",
+}
+
+
+def financial_checks(text: str) -> list[str]:
+    clauses = [compact(part).casefold() for part in re.split(r"[.;]", text) if part.strip()]
+    if not clauses or any(part not in FINANCIAL_CLAUSES for part in clauses):
+        return []
+    return list(dict.fromkeys(FINANCIAL_CLAUSES[part] for part in clauses))
+
 
 def condition_kind(text: str) -> tuple[str, str]:
     normalized = compact(text).casefold().rstrip(".")
@@ -87,6 +103,9 @@ def condition_kind(text: str) -> tuple[str, str]:
         return "administrative", "submission_before_publication"
     if normalized in APPROVAL:
         return "administrative", "artist_approval_before_invoice"
+    financial = financial_checks(text)
+    if financial:
+        return "financial", "financial_" + "_and_".join(financial)
     if re.fullmatch(r"campaign category must be [\w -]+", normalized):
         return "metadata", "campaign_category"
     if (
@@ -109,6 +128,11 @@ def condition_kind(text: str) -> tuple[str, str]:
 
 def condition_plan(terms: Terms) -> list[dict]:
     return [
-        {"text": text, "kind": condition_kind(text)[0], "check": condition_kind(text)[1]}
+        {
+            "text": text,
+            "kind": condition_kind(text)[0],
+            "check": condition_kind(text)[1],
+            **({"financial_checks": financial_checks(text)} if financial_checks(text) else {}),
+        }
         for text in terms.special_conditions
     ]

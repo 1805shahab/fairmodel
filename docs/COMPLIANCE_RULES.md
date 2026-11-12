@@ -1,6 +1,6 @@
 # Compliance rule semantics and provenance
 
-The deterministic engine owns scope, dates, eligibility and money. Gemini assesses only transcript content and genuine purpose uncertainty. It cannot broaden approved rights or calculate a charge. Current policy version 4 retains version-3 semantic/source fixes and adds persistent overlap decisions and canonical billing; reevaluate historical reports before relying on eligibility.
+The deterministic engine owns scope, dates, eligibility and money. Gemini assesses only transcript content and genuine purpose uncertainty. It cannot broaden approved rights or calculate a charge. Current policy version 5 retains the earlier semantic/source and canonical-overlap safeguards and explicitly routes supported financial special conditions to the deterministic engine. Reevaluate historical reports and charge approvals before further financial writes; approved contracts, manual identity attestations and historical invoices are not rewritten.
 
 ## Medium and category vocabulary
 
@@ -30,6 +30,10 @@ The registry also maps US/USA/U.S./United States to the same territory label, an
 | Administrative: submit for review before publication | Verify the studio's persisted upload and compliance-request audit receipts and analyzed asset. Never require the narrator to say that review occurred. Local receipts do not independently prove external publication timing. |
 | Administrative: artist approves royalties before invoicing | Enforced at the later invoice stage by the separate artist decision and existing provider/route approval guards. It is not a transcript condition and does not create a circular requirement to approve a nonexistent royalty first. |
 | Human interpretation | Unsupported wording, custom obligations and ambiguous conditions hold eligibility for review. No guessed administrative rule is treated as satisfied. |
+
+Financial special conditions are also handled deterministically. The explicit whole-clause registry recognizes measured spoken-duration billing with silence/non-speech music excluded, proportional fractional seconds, and final two-decimal HALF_UP rounding. It accepts combinations only when every clause is recognized; new qualifications, HALF_EVEN or mixed content/approval obligations remain human review. These conditions stay in the immutable approved contract and retain verified per-condition quotations/pages.
+
+Generation/simulator previews verify supported engine policy but label speech-only billing `deferred_to_audio_analysis`: no actual duration has yet been measured. Final compliance requires reliable spoken-duration evidence and applies the existing Decimal calculation, with final-only ROUND_HALF_UP cents. Missing citations, uncertain measurements, unknown conditions, restrictions, identity/use authorization, overlap/review holds and artist charge approval remain independently enforced. Gemini is never asked to infer or calculate these financial facts.
 
 Gemini receives only content rule IDs/text, the actual transcript and the declared category. Administrative clauses, financial allowances, geographic scope and medium labels are excluded from its decision task. Benign confirmations are not converted to conflicts just because they lack transcript quotations. Genuine findings require their supplied rule ID and exact supporting transcript passage. Purpose uncertainty remains advisory `NEEDS_REVIEW`.
 

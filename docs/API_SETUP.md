@@ -1,5 +1,19 @@
 # API and local tool setup
 
+Optional Fish generation: backend-only `FISH_API_KEY`, `FISH_TTS_MODEL=s2.1-pro-free`, `ENABLE_VOICE_GENERATION=true`, `ENABLE_FISH_GENERATION=true`, then restart. Do not replace `.env`. Fish requires its own artist grant and explicit studio selection. Paid models/profile creation/fallbacks are blocked. See [Fish setup, retention limits and manual test](FISH_AUDIO.md). Configuration does not verify live access.
+
+Gemini generation endpoints: `GET /api/references/{id}/audio` is artist-owned playback; `GET/POST /api/voice-grants` lists assigned grants or records artist consent for an approved version; `POST /api/voice-grants/{id}/revoke` is artist-only. `GET/POST /api/generations` lists owned jobs or explicitly requests studio Gemini generation with a stable request key. The resulting asset uses all existing analysis/compliance/financial endpoints; no generation endpoint approves a charge. See [Gemini setup and required recordings](GEMINI_VOICE_WORKFLOW.md). `ENABLE_VOICE_GENERATION` defaults false; the server-only key stays in the existing `.env`, which was not overwritten.
+
+New product endpoints (existing demo-persona/ownership checks apply):
+
+- `GET /api/assets/{id}/passport`: private read-only workflow snapshot, no provider calls.
+- `GET /api/review-cases`: assigned cases and append-only response history.
+- `POST /api/assets/{id}/review-cases`: artist decision with unique `request_key`, `decision`, `category`, required `note`, optional actual `evidence_refs`.
+- `POST /api/review-cases/{id}/events`: assigned studio/artist `RESPONSE` or artist-only `RESOLVE`, with unique `request_key` and note.
+- `POST /api/licenses/{id}/estimate`: Studio-only approved agreement preview with `campaign` and decimal-string `spoken_seconds`; no usage/financial writes.
+
+Schema 5 upgrades with a consistent backup. OpenAPI includes validated command/response schemas. No new environment variables/packages are needed. See [PRODUCT_UPGRADE.md](PRODUCT_UPGRADE.md).
+
 Copy `backend/.env.example` to `backend/.env` only if it does not exist. Edit secrets locally; do not paste them into chat, commits, screenshots, shell arguments or frontend environment variables. Launch the backend from `backend/` so relative DB/storage/config paths resolve consistently. The helper scripts do this automatically.
 
 ## Google Gemini

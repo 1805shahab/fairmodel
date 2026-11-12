@@ -1,5 +1,7 @@
 # Three-minute FairModel judging script
 
+November 11 product upgrade: use **Voice usage passport** as the evidence hub after showing analysis. Select Medium in the explorer, open its real PDF clause, then show independent authorization/royalty/payment stages. Show the Studio simulator's 45s → USD 30 preview as explicitly conditional and no-write. The Review Center can show an existing fictional concern/response/resolution; do not replace real artist attestation or initiate a payment for this segment. Keep the existing three-minute structure by shortening repeated table navigation. Print/save a private snapshot only if needed; it is not a legal or biometric certificate. Actual paid Sandbox evidence still requires the separately approved real test.
+
 ## Live AI + actual Sandbox variant (prepare before recording)
 
 Complete the separately authorized real draft, send, manual buyer payment and authoritative refresh using [PAYPAL_SANDBOX_TESTING.md](PAYPAL_SANDBOX_TESTING.md). They have **not yet been performed**. Until then, present only OAuth/read-only access as live PayPal evidence.

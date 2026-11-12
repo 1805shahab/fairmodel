@@ -19,6 +19,8 @@ import {
   ReceiptText,
   Settings2,
   ShieldCheck,
+  ClipboardCheck,
+  Calculator,
   X,
 } from "lucide-react";
 import type { Role } from "./types";
@@ -55,9 +57,20 @@ const links = [
     Icon: ReceiptText,
   },
   { href: "/dashboard/analytics", label: "Analytics", Icon: Activity },
+  { href: "/dashboard/reviews", label: "Review Center", Icon: ClipboardCheck },
 ];
 
 const utilityLinks = [
+  {
+    href: "/dashboard/generate",
+    label: "Generate advertisement",
+    Icon: AudioLines,
+  },
+  {
+    href: "/dashboard/simulator",
+    label: "Royalty simulator",
+    Icon: Calculator,
+  },
   { href: "/dashboard/references", label: "Reference voice", Icon: Mic2 },
   { href: "/dashboard/audit", label: "Audit trail", Icon: ShieldCheck },
   {
@@ -288,7 +301,7 @@ export default function Workspace({
             </aside>
           </>
         )}
-        <div className="workspace-main" inert={mobile}>
+        <div className="workspace-main" inert={mobile || switching}>
           <main
             className="page-content"
             id="workspace-content"

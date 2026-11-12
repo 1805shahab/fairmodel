@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from uuid import uuid4
+from fastapi import Request
 
 from sqlalchemy import JSON, ForeignKey, String, UniqueConstraint, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
@@ -81,6 +82,38 @@ class Asset(Record, Base):
     error: Mapped[str | None]
 
 
+class VoiceGrant(Record, Base):
+    __tablename__ = "voice_generation_grants"
+    __table_args__ = (UniqueConstraint("reference_id", "license_id", "license_version", "provider"),)
+    provider: Mapped[str] = mapped_column(default="gemini", server_default="gemini")
+    reference_text: Mapped[str | None]
+    reference_id: Mapped[str] = mapped_column(ForeignKey("reference_voices.id"))
+    license_id: Mapped[str] = mapped_column(ForeignKey("licenses.id"))
+    license_version: Mapped[int]
+    artist_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    studio_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    consent_path: Mapped[str]
+    consent_hash: Mapped[str]
+    note: Mapped[str]
+    revoked_at: Mapped[str | None]
+
+
+class SpeechGeneration(Record, Base):
+    __tablename__ = "speech_generations"
+    __table_args__ = (UniqueConstraint("studio_id", "request_key"),)
+    provider: Mapped[str] = mapped_column(default="gemini", server_default="gemini")
+    grant_id: Mapped[str] = mapped_column(ForeignKey("voice_generation_grants.id"))
+    studio_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    request_key: Mapped[str]
+    input_hash: Mapped[str]
+    script: Mapped[str]
+    campaign: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(default="RUNNING")
+    asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id"))
+    receipt: Mapped[dict] = mapped_column(JSON, default=dict)
+    error: Mapped[str | None]
+
+
 class Analysis(Record, Base):
     __tablename__ = "audio_analyses"
     asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), unique=True)
@@ -119,6 +152,43 @@ class RoyaltyApproval(Record, Base):
     artist_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
     evidence_hash: Mapped[str]
     note: Mapped[str]
+
+
+class EvidenceRevision(Record, Base):
+    __tablename__ = "evidence_revisions"
+    __table_args__ = (UniqueConstraint("asset_id", "kind", "revision_hash"),)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), index=True)
+    kind: Mapped[str]
+    revision_hash: Mapped[str]
+    snapshot: Mapped[dict] = mapped_column(JSON)
+    origin: Mapped[str] = mapped_column(default="workflow_snapshot")
+
+
+class UsageCase(Record, Base):
+    __tablename__ = "usage_cases"
+    __table_args__ = (UniqueConstraint("asset_id", "request_key"),)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), index=True)
+    artist_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    studio_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    license_version: Mapped[int]
+    request_key: Mapped[str]
+    decision: Mapped[str]
+    category: Mapped[str]
+    note: Mapped[str]
+    evidence_refs: Mapped[list] = mapped_column(JSON, default=list)
+    evidence_hash: Mapped[str]
+    status: Mapped[str] = mapped_column(default="OPEN")
+
+
+class CaseEvent(Record, Base):
+    __tablename__ = "usage_case_events"
+    __table_args__ = (UniqueConstraint("case_id", "request_key"),)
+    case_id: Mapped[str] = mapped_column(ForeignKey("usage_cases.id"), index=True)
+    actor_id: Mapped[str] = mapped_column(ForeignKey("personas.id"))
+    request_key: Mapped[str]
+    kind: Mapped[str]
+    note: Mapped[str]
+    evidence_hash: Mapped[str]
 
 
 class Report(Record, Base):
@@ -227,10 +297,18 @@ def sqlite_pragmas(connection, _):
     connection.execute("PRAGMA journal_mode=WAL")
 
 
-def get_session():
+def get_session(request: Request):
     with Session(engine, expire_on_commit=False) as session:
-        # Serialize local transactions, including allowance allocation and idempotency checks.
-        session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+        # WAL readers must not claim a writer lock or starve file/record requests.
+        # This GET refreshes persisted payment state; all financial writes remain serialized.
+        preview = (
+            request.method == "POST"
+            and request.url.path.startswith("/api/licenses/")
+            and request.url.path.endswith("/estimate")
+        )
+        status_sync = request.url.path.startswith("/api/invoices/") and request.url.path.endswith("/status")
+        write = (request.method not in {"GET", "HEAD", "OPTIONS"} and not preview) or status_sync
+        session.connection().exec_driver_sql("BEGIN IMMEDIATE" if write else "BEGIN")
         try:
             yield session
             session.commit()

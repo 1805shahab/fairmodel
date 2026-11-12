@@ -36,6 +36,17 @@ from .db import (
     now,
     serialize,
     uid,
+    UsageCase,
+    CaseEvent,
+)
+from .passports import (
+    capture_revision,
+    passport,
+    case_view,
+    review_fingerprint,
+    review_context,
+    estimate,
+    provenance,
 )
 from .payments import provider, payment_notice, sandbox_provider, settled_amount, outstanding_amount
 from .paypal_client import paypal_client
@@ -81,9 +92,15 @@ from .schemas import (
     RoyaltyResponse,
     Terms,
     ContentFindings,
+    PassportResponse,
+    UsageCaseCommand,
+    CaseEventCommand,
+    CaseResponse,
+    EstimateCommand,
+    EstimateResponse,
 )
 
-DB = Annotated[Session, Depends(get_session)]
+DB = Annotated[Session, Depends(get_session, scope="function")]
 
 
 def seed(session: Session):
@@ -193,6 +210,14 @@ def asset_owned(db: Session, id_: str, actor: Persona) -> tuple[Asset, License]:
 
 
 def audit(db, actor, license_, action, entity_id, detail=None):
+    # Record successful/failed revisions alongside the audit, within the same transaction.
+    if action.startswith(("analysis.", "compliance.", "usage.authorization")):
+        for model, kind in (
+            (Analysis, "analysis"),
+            (Report, "compliance"),
+            (UsageAuthorization, "authorization"),
+        ):
+            capture_revision(db, kind, db.scalar(select(model).where(model.asset_id == entity_id)))
     db.add(
         Audit(
             actor_id=actor.id,
@@ -292,6 +317,23 @@ def integrations(actor: Actor):
         "groq": {
             "configured": bool(settings.groq_api_key.get_secret_value()),
             "model": settings.groq_whisper_model,
+        },
+        "voice_generation": {
+            "diagnostics_version": 1,
+            "enabled": settings.enable_voice_generation,
+            "configured": bool(settings.gemini_api_key.get_secret_value()),
+            "model": settings.gemini_tts_model,
+            "replication_model": settings.gemini_voice_replication_model,
+            "provider": "Gemini TTS",
+            "voice_mode": "replicated; separate authentic consent recording required",
+            "access_note": "Paid-tier project required; configured status does not verify provider access.",
+            "fish": {
+                "output_audio_pipeline": "mp3-complete-probe-normalize-v5",
+                "enabled": settings.enable_voice_generation and settings.enable_fish_generation,
+                "configured": bool(settings.fish_api_key.get_secret_value()),
+                "model": settings.fish_tts_model,
+                "access_note": "Free model under fair-use limits; no DPA/zero-retention guarantee. Separate Fish artist consent required. No live access verification implied.",
+            },
         },
         "audio_tools": audio.availability(),
         "speaker_verification": {
@@ -677,6 +719,13 @@ def asset_view(db, asset, detail=False):
             )
         else:
             action = "Review the actual Sandbox invoice/payment history. The test buyer pays manually through the provider-returned link; refresh status afterward."
+    cases = review_context(
+        db, asset, (report.result.get("billing_usage") or {}).get("member_asset_ids") if report else None
+    )
+    if cases["blocked"]:
+        compliance = "RESTRICTED_USAGE" if compliance == "RESTRICTED_USAGE" else "NEEDS_REVIEW"
+        stage = "NEEDS_REVIEW"
+        action = "Open the Review Center: an open or stale artist decision requires resolution and compliance reevaluation. Existing invoices remain unchanged and require reconciliation."
     return {
         **public(asset),
         "status": compliance if report else processing,
@@ -687,6 +736,10 @@ def asset_view(db, asset, detail=False):
         "invoice_state": invoice.status if invoice else "NOT_CREATED",
         "workflow_stage": stage,
         "next_action": action,
+        "provenance": provenance(
+            analysis.result if analysis else None, shown_report["result"] if shown_report else None
+        ),
+        "review_cases": cases,
         **(
             {
                 "analysis": public(analysis) if analysis else None,
@@ -760,6 +813,7 @@ def review_usage(id_: str, body: AuthorizationReview, db: DB, actor: Actor):
         raise HTTPException(409, "Analyze the audio before reviewing identity and authorization.")
     approved_version(db, asset, license_)
     review = db.scalar(select(UsageAuthorization).where(UsageAuthorization.asset_id == id_))
+    capture_revision(db, "authorization", review)
     if (
         review
         and review.identity_confirmed == body.identity_confirmed
@@ -780,6 +834,7 @@ def review_usage(id_: str, body: AuthorizationReview, db: DB, actor: Actor):
     )
     review.evidence_hash, review.updated_at = evidence_hash(asset, analysis), now()
     report = db.scalar(select(Report).where(Report.asset_id == id_))
+    capture_revision(db, "compliance", report)
     if report:
         asset.status = "NEEDS_REVIEW"
         report.status = "NEEDS_REVIEW"
@@ -822,6 +877,7 @@ def correct_campaign(id_: str, body: Campaign, db: DB, actor: Actor):
         )
     asset.campaign = body.model_dump(mode="json")
     report = db.scalar(select(Report).where(Report.asset_id == id_))
+    capture_revision(db, "compliance", report)
     if report:
         db.delete(report)
     # Keep the recorded attestation for history; changed evidence makes its status stale.
@@ -844,6 +900,8 @@ def analyze_audio(id_: str, body: ExtractionCommand, db: DB, actor: Actor):
     require_role(actor, "studio")
     asset, license_ = asset_owned(db, id_, actor)
     existing = db.scalar(select(Analysis).where(Analysis.asset_id == id_))
+    capture_revision(db, "analysis", existing)
+    capture_revision(db, "compliance", db.scalar(select(Report).where(Report.asset_id == id_)))
     if existing and not body.reprocess and existing.result.get("demo_fixture") is body.use_demo_fixture:
         return public(existing)
     if existing and db.scalar(select(Royalty).where(Royalty.asset_id == id_)):
@@ -910,6 +968,7 @@ def analyze_audio(id_: str, body: ExtractionCommand, db: DB, actor: Actor):
 def evaluate_asset(id_: str, body: ExtractionCommand, db: DB, actor: Actor):
     asset, license_ = asset_owned(db, id_, actor)
     existing = db.scalar(select(Report).where(Report.asset_id == id_))
+    capture_revision(db, "compliance", existing)
     analysis = db.scalar(select(Analysis).where(Analysis.asset_id == id_))
     if not analysis:
         raise HTTPException(409, "Analyze the audio before evaluating compliance.")
@@ -991,6 +1050,14 @@ def evaluate_asset(id_: str, body: ExtractionCommand, db: DB, actor: Actor):
     )
     result["overlap"] = context["overlap"]
     result["billing_usage"] = context["usage"]
+    if context.get("review_cases", {}).get("blocked"):
+        if result["status"] != "RESTRICTED_USAGE":
+            result["status"] = "NEEDS_REVIEW"
+        result["eligible_for_charge"] = False
+        result["reasons"].append(
+            "An open or stale artist review/dispute blocks financial approval. Resolve it in the Review Center, then reevaluate. Existing invoices require reconciliation; no provider action was performed."
+        )
+        result["review_cases"] = context["review_cases"]
     if context["usage"]["reconciliation_required"] or context["cumulative_reconciliation_required"]:
         if result["status"] != "RESTRICTED_USAGE":
             result["status"] = "NEEDS_REVIEW"
@@ -1071,6 +1138,21 @@ def evaluate_asset(id_: str, body: ExtractionCommand, db: DB, actor: Actor):
         )
     asset.status, asset.error = result["status"], None
     db.flush()
+    if result["eligible_for_charge"] and not royalty:
+        allocation = db.scalar(select(Royalty).where(Royalty.asset_id == id_))
+        audit(
+            db,
+            actor,
+            license_,
+            "royalty.calculated",
+            allocation.id,
+            {
+                "asset_id": id_,
+                "amount": allocation.amount,
+                "currency": allocation.currency,
+                "method": "deterministic_decimal",
+            },
+        )
     audit(db, actor, license_, "compliance.evaluated", id_, {"status": result["status"], "provider": source})
     return public(report)
 
@@ -1236,6 +1318,15 @@ def refresh_invoice(id_: str, db: DB, actor: Actor):
     invoice = owned(db, Invoice, id_, actor)
     if invoice.provider == "paypal_sandbox":
         sandbox_provider.refresh(db, invoice)
+        royalty = db.get(Royalty, invoice.royalty_id)
+        audit(
+            db,
+            actor,
+            owned(db, License, royalty.license_id, actor),
+            "invoice.status_synchronized",
+            invoice.id,
+            {"status": invoice.status, "provider": invoice.provider},
+        )
     return invoice_public(db, invoice, events=True)
 
 
@@ -1390,3 +1481,162 @@ def download_fixture(kind: str, actor: Actor):
     return FileResponse(
         path, filename=path.name, media_type="application/pdf" if kind == "contract" else "audio/wav"
     )
+
+
+@app.get("/api/assets/{id_}/passport", response_model=PassportResponse)
+def get_passport(id_: str, db: DB, actor: Actor):
+    asset, license_ = asset_owned(db, id_, actor)
+    view = asset_view(db, asset, detail=True)
+    if view.get("invoice"):
+        view["invoice"] = invoice_public(db, db.get(Invoice, view["invoice"]["id"]), events=True)
+    return passport(db, asset, license_, view)
+
+
+@app.get("/api/review-cases", response_model=list[CaseResponse])
+def review_cases(db: DB, actor: Actor):
+    rows = db.scalars(
+        select(UsageCase)
+        .where(or_(UsageCase.artist_id == actor.id, UsageCase.studio_id == actor.id))
+        .order_by(UsageCase.created_at.desc())
+    )
+    return [
+        {
+            **case_view(
+                db,
+                row,
+                db.get(Asset, row.asset_id),
+                db.scalar(select(Analysis).where(Analysis.asset_id == row.asset_id)),
+            ),
+            "asset_name": db.get(Asset, row.asset_id).original_name,
+            "campaign_name": db.get(Asset, row.asset_id).campaign.get("name"),
+        }
+        for row in rows
+    ]
+
+
+@app.post("/api/assets/{id_}/review-cases", response_model=CaseResponse, status_code=201)
+def create_review_case(id_: str, body: UsageCaseCommand, db: DB, actor: Actor):
+    require_role(actor, "artist")
+    asset, license_ = asset_owned(db, id_, actor)
+    approved_version(db, asset, license_)
+    analysis = db.scalar(select(Analysis).where(Analysis.asset_id == id_))
+    fingerprint = review_fingerprint(asset, analysis)
+    existing = db.scalar(
+        select(UsageCase).where(UsageCase.asset_id == id_, UsageCase.request_key == body.request_key)
+    )
+    if existing:
+        if (existing.decision, existing.category, existing.note, existing.evidence_refs) != (
+            body.decision,
+            body.category,
+            body.note,
+            body.evidence_refs,
+        ):
+            raise HTTPException(409, "This request key already identifies a different decision.")
+        return case_view(db, existing, asset, analysis)
+    evidence = passport(db, asset, license_, asset_view(db, asset, detail=True))
+    allowed_refs = {row["id"] for row in evidence["history"] + evidence["audit"]}
+    allowed_refs.update(
+        "contract:" + item["field"] for item in evidence["license"]["source_review"]["citations"]
+    )
+    for key in ("analysis", "report", "authorization", "royalty", "invoice"):
+        if evidence["asset"].get(key):
+            allowed_refs.add(evidence["asset"][key]["id"])
+    if not set(body.evidence_refs).issubset(allowed_refs):
+        raise HTTPException(422, "Supporting references must belong to this asset and approved contract.")
+    row = UsageCase(
+        asset_id=id_,
+        artist_id=actor.id,
+        studio_id=asset.studio_id,
+        license_version=asset.license_version,
+        request_key=body.request_key,
+        decision=body.decision,
+        category=body.category,
+        note=body.note,
+        evidence_refs=body.evidence_refs,
+        evidence_hash=fingerprint,
+        status="RESOLVED" if body.decision == "APPROVE_USAGE" else "OPEN",
+    )
+    db.add(row)
+    db.flush()
+    db.add(
+        CaseEvent(
+            case_id=row.id,
+            actor_id=actor.id,
+            request_key=body.request_key,
+            kind="OPENED" if row.status == "OPEN" else "APPROVED_USAGE",
+            note=body.note,
+            evidence_hash=fingerprint,
+        )
+    )
+    audit(
+        db,
+        actor,
+        license_,
+        "usage.review_recorded",
+        id_,
+        {"case_id": row.id, "decision": row.decision, "category": row.category},
+    )
+    db.flush()
+    return case_view(db, row, asset, analysis)
+
+
+@app.post("/api/review-cases/{id_}/events", response_model=CaseResponse)
+def update_review_case(id_: str, body: CaseEventCommand, db: DB, actor: Actor):
+    row = owned(db, UsageCase, id_, actor)
+    asset, license_ = asset_owned(db, row.asset_id, actor)
+    if body.kind == "RESOLVE":
+        require_role(actor, "artist")
+    existing = db.scalar(
+        select(CaseEvent).where(CaseEvent.case_id == row.id, CaseEvent.request_key == body.request_key)
+    )
+    analysis = db.scalar(select(Analysis).where(Analysis.asset_id == asset.id))
+    if existing:
+        if (existing.kind, existing.note, existing.actor_id) != (body.kind, body.note, actor.id):
+            raise HTTPException(409, "This request key already identifies a different response.")
+        return case_view(db, row, asset, analysis)
+    if body.kind == "RESPONSE" and row.status == "RESOLVED":
+        raise HTTPException(
+            409, "This case is resolved. The artist must open a new concern for further discussion."
+        )
+    db.add(
+        CaseEvent(
+            case_id=row.id,
+            actor_id=actor.id,
+            request_key=body.request_key,
+            kind=body.kind,
+            note=body.note,
+            evidence_hash=review_fingerprint(asset, analysis),
+        )
+    )
+    if body.kind == "RESOLVE":
+        row.status = "RESOLVED"
+    row.updated_at = now()
+    audit(
+        db,
+        actor,
+        license_,
+        "usage.dispute_resolved" if body.kind == "RESOLVE" else "usage.dispute_response",
+        asset.id,
+        {"case_id": row.id},
+    )
+    db.flush()
+    return case_view(db, row, asset, analysis)
+
+
+@app.post("/api/licenses/{id_}/estimate", response_model=EstimateResponse)
+def estimate_usage(id_: str, body: EstimateCommand, db: DB, actor: Actor):
+    require_role(actor, "studio")
+    license_ = owned(db, License, id_, actor)
+    version = db.scalar(
+        select(LicenseVersion).where(
+            LicenseVersion.license_id == id_, LicenseVersion.version == license_.version
+        )
+    )
+    if not version or license_.status != "ACTIVE" or version.approved_by != license_.artist_id:
+        raise HTTPException(409, "An active artist-approved contract is required for an estimate.")
+    return estimate(db, license_, version, body)
+
+
+from .voice_routes import router as voice_router  # noqa: E402 - existing workflow helpers are defined first.
+
+app.include_router(voice_router)

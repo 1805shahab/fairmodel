@@ -7,7 +7,7 @@ from .db import Analysis, Asset, License, LicenseVersion, Report, RoyaltyApprova
 from .compliance_evidence import evidence_context
 from .evidence import digest, evidence_hash
 
-POLICY_VERSION = 4
+POLICY_VERSION = 5
 
 
 def approved_version(db, asset, license_):
@@ -89,6 +89,7 @@ def royalty_is_eligible(db, royalty) -> bool:
         and authorization["status"] == "artist_confirmed"
         and context["usage"]["allocation_permitted"]
         and not context.get("cumulative_reconciliation_required")
+        and not context.get("review_cases", {}).get("blocked")
         and calculation.get("amount") == royalty.amount
         and calculation.get("currency") == royalty.currency
     )

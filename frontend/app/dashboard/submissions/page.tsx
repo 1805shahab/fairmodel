@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, AudioLines, Upload } from "lucide-react";
 import {
@@ -13,8 +14,21 @@ import { useWorkspace } from "@/components/workspace";
 import { date } from "@/components/api";
 import type { Asset } from "@/components/types";
 export default function Submissions() {
+  const [mode, setMode] = useState("all");
   const { role } = useWorkspace();
   const { data, error, loading, retry } = useData<Asset[]>("/assets");
+  const shown = data?.filter(
+    (x) =>
+      mode === "all" ||
+      (mode === "live"
+        ? x.provenance?.transcription === "live" &&
+          x.provenance?.compliance === "live"
+        : mode === "fixture"
+          ? x.provenance?.transcription === "fixture" ||
+            x.provenance?.compliance === "fixture"
+          : x.provenance?.transcription === "unverified" ||
+            x.provenance?.compliance === "unverified"),
+  );
   return (
     <>
       <PageHeading
@@ -31,6 +45,22 @@ export default function Submissions() {
         }
       />
       {error && <ErrorPanel message={error} retry={retry} />}
+      <div className="passport-actions provenance-filter">
+        <label htmlFor="evidence-mode">Evidence provenance</label>
+        <select
+          id="evidence-mode"
+          value={mode}
+          onChange={(e) => setMode(e.target.value)}
+        >
+          <option value="all">All records</option>
+          <option value="live">Live transcription + compliance receipts</option>
+          <option value="fixture">Contains local fixture evidence</option>
+          <option value="unverified">Pending / unverified receipt</option>
+        </select>
+        <span className="small muted">
+          Filters preserve every saved recording.
+        </span>
+      </div>
       <section className="panel">
         {loading ? (
           <Loading />
@@ -60,7 +90,7 @@ export default function Submissions() {
                 </tr>
               </thead>
               <tbody>
-                {data.map((x) => (
+                {shown?.map((x) => (
                   <tr key={x.id}>
                     <td>
                       <Link
@@ -73,6 +103,12 @@ export default function Submissions() {
                         <span>
                           <strong>{x.campaign.name}</strong>
                           <small>{x.original_name}</small>
+                          <small>
+                            Transcription:{" "}
+                            {x.provenance?.transcription || "unverified"} ·
+                            compliance:{" "}
+                            {x.provenance?.compliance || "unverified"}
+                          </small>
                         </span>
                       </Link>
                     </td>
@@ -86,6 +122,12 @@ export default function Submissions() {
                       <Badge status={x.compliance_state || "PENDING"} />
                     </td>
                     <td>
+                      <Link
+                        className="text-link"
+                        href={`/dashboard/submissions/${x.id}/passport`}
+                      >
+                        Passport
+                      </Link>
                       <Link
                         href={`/dashboard/submissions/${x.id}`}
                         aria-label={`Open ${x.campaign.name}`}

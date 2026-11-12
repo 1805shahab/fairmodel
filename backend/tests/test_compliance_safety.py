@@ -183,7 +183,9 @@ def test_legacy_cached_report_requires_current_safety_review(client, artist, stu
     edit_db(legacy)
     reevaluated = client.post(f"/api/assets/{asset_id}/evaluate", headers=studio, json={}).json()
     assert reevaluated["status"] == "NEEDS_REVIEW"
-    assert reevaluated["result"]["policy_version"] == 4
+    from app.eligibility import POLICY_VERSION
+
+    assert reevaluated["result"]["policy_version"] == POLICY_VERSION
     assert not client.get("/api/royalties", headers=artist).json()[0]["eligible_for_charge"]
 
 

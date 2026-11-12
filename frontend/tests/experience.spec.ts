@@ -140,12 +140,13 @@ test("analytics keeps four KPIs aligned and links state/currency/search filters 
   );
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/dashboard/analytics");
-  const tops = await page
+  const cards = page
     .getByRole("region", { name: "USD ledger totals" })
-    .locator(".stat-card")
-    .evaluateAll((items) =>
-      items.map((item) => item.getBoundingClientRect().top),
-    );
+    .locator(".stat-card");
+  await expect(cards).toHaveCount(4);
+  const tops = await cards.evaluateAll((items) =>
+    items.map((item) => item.getBoundingClientRect().top),
+  );
   expect(tops).toHaveLength(4);
   expect(new Set(tops).size).toBe(1);
   await page

@@ -654,3 +654,32 @@ def test_read_retry_and_401_refresh_never_repeat_posts():
     assert wire.request("GET", "/v2/invoicing/invoices") == {"items": []}
     assert sum(path == "/v1/oauth2/token" for _, path in seen) == 2
     wire.http.close()
+
+
+def test_passport_retains_actual_returned_sandbox_id_and_partial_payment_state(
+    client, artist, studio, monkeypatch, terms, paypal
+):
+    fake, _ = paypal
+    asset, royalty = charge(client, artist, studio, monkeypatch, terms)
+    invoice = create(client, artist, royalty).json()
+    remote = fake.remote[invoice["provider_id"]]
+    remote["status"] = "PARTIALLY_PAID"
+    remote["due_amount"]["value"] = "20.00"
+    remote["payments"] = {
+        "paid_amount": {"currency_code": "USD", "value": "10.00"},
+        "transactions": [
+            {
+                "type": "PAYPAL",
+                "payment_id": "TEST-PASSPORT-PARTIAL",
+                "amount": {"currency_code": "USD", "value": "10.00"},
+            }
+        ],
+    }
+    assert client.post(f"/api/invoices/{invoice['id']}/refresh", headers=artist).status_code == 200
+    # HTTP responses here are explicitly mocked, not proof of a live Sandbox operation.
+    asset_id = client.get("/api/royalties", headers=artist).json()[0]["asset_id"]
+    p = client.get(f"/api/assets/{asset_id}/passport", headers=artist).json()
+    assert p["asset"]["invoice"]["provider_id"] == invoice["provider_id"]
+    assert not p["asset"]["invoice"]["simulated"]
+    assert p["asset"]["invoice"]["sandbox"]["paid_amount"] == "10.00"
+    assert p["stages"][-1]["state"] == "pending"

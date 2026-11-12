@@ -1,5 +1,7 @@
 # FairModel — submission preparation
 
+November 11 product upgrade adds private Voice Usage Passports, interactive compliance evidence with valid segment seeking, artist/studio review threads and dispute holds, Studio no-write Decimal previews, append-only evidence history, chronological audit and live/fixture provenance filters. Schema 5 preserves original records with a consistent backup. Final evidence: 190 backend tests/Ruff, TypeScript/ESLint/production build and 23 Edge checks pass. New browser financial/AI workflows use explicit fixtures/mocks; fresh actual Sandbox verification covers OAuth/read-only capability only, not draft/send/buyer settlement. See [PRODUCT_UPGRADE.md](PRODUCT_UPGRADE.md).
+
 Current routing update (November 10): FairModel is one application. `/` introduces the product and opens the same `/dashboard`; `/control-room` redirects there; the former fictional preview is retired. Artist/studio roles share the working UI. Standard backend startup selects actual PayPal Sandbox, with default-off draft/send writes; local simulation requires `-MockPayments`. Historical preview descriptions below document earlier milestones, not a second available app. See docs/APP_WORKFLOW.md.
 
 **Project:** AI Voice Licensing, Compliance & Royalty Payments

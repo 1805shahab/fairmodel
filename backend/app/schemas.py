@@ -112,6 +112,48 @@ class AuthorizationReview(Schema):
     note: str = Field(min_length=10, max_length=2000)
 
 
+class UsageCaseCommand(Schema):
+    request_key: str = Field(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")
+    decision: Literal["APPROVE_USAGE", "REQUEST_CHANGES", "REJECT_USAGE", "INVESTIGATE"]
+    category: Literal["campaign", "medium", "voice_identity", "metadata", "royalty", "duplicate", "other"]
+    note: str = Field(min_length=10, max_length=2000)
+    evidence_refs: list[str] = Field(default_factory=list, max_length=20)
+
+
+class CaseEventCommand(Schema):
+    request_key: str = Field(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")
+    kind: Literal["RESPONSE", "RESOLVE"]
+    note: str = Field(min_length=10, max_length=2000)
+
+
+class EstimateCommand(Schema):
+    campaign: Campaign
+    spoken_seconds: Decimal = Field(ge=0, le=600, allow_inf_nan=False)
+
+
+class PassportResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    id: str
+    asset_id: str
+    snapshot_at: str
+    disclaimer: str
+
+
+class CaseResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    id: str
+    asset_id: str
+    status: str
+
+
+class EstimateResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    estimate_only: bool
+    scope_status: str
+    notice: str
+    calculation: dict | None
+
+
 class OverlapDecision(Schema):
     related_asset_id: str
     decision: Literal["SAME_USAGE", "SEPARATE_USAGE", "UNCERTAIN"]

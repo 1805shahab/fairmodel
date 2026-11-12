@@ -17,12 +17,15 @@ os.environ["DATABASE_URL"] = "sqlite:///" + (Path(TEST_ROOT.name) / "lifespan.db
 os.environ["STORAGE_DIR"] = str(Path(TEST_ROOT.name) / "uploads")
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["GROQ_API_KEY"] = ""
+os.environ["FISH_API_KEY"] = ""
+os.environ["ENABLE_FISH_GENERATION"] = "false"
 os.environ["PAYPAL_CLIENT_ID"] = ""
 os.environ["PAYPAL_CLIENT_SECRET"] = ""
 os.environ["PAYPAL_WEBHOOK_ID"] = ""
 os.environ["PAYPAL_ALLOW_DRAFTS"] = "false"
 os.environ["PAYPAL_ALLOW_SENDING"] = "false"
 os.environ["PAYMENT_PROVIDER"] = "mock"
+os.environ["ENABLE_VOICE_GENERATION"] = "false"
 os.environ["DEMO_MODE"] = "true"
 
 from app.config import settings  # noqa: E402

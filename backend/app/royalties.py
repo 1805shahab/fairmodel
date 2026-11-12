@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from .schemas import Campaign, ContentFindings, Terms
 from .canonical import MEDIA, canonical, category, label as canonical_label, medium_scope, territory
-from .contract_rules import condition_plan
+from .contract_rules import compact, condition_plan
 
 CENT = Decimal("0.01")
 
@@ -62,6 +62,7 @@ def evaluate(
     source_review: dict | None = None,
     workflow: dict | None = None,
     overlap: list[dict] | None = None,
+    preview_only: bool = False,
 ) -> dict:
     reasons = []
     restricted = []
@@ -185,13 +186,55 @@ def evaluate(
                     "Declared campaign category satisfies the source-backed metadata condition.",
                 )
             else:
-                explanation = "The campaign category metadata condition requires review."
+                declared = (campaign.category or "").strip()
+                explanation = (
+                    f"Campaign category is missing. Enter '{expected}' to satisfy the approved category condition."
+                    if not declared
+                    else f"Declared campaign category '{declared}' does not match the approved required category '{expected}'. Correct the metadata or ask the artist to review the contract; permission is not inferred."
+                )
         elif kind == "content":
             outcome, explanation = (
                 "assessed_by_content_provider",
                 "Content condition was supplied to the transcript assessment provider: " + condition["text"],
             )
+        elif kind == "financial":
+            try:
+                # Verify supported approved Decimal rules, not an LLM's calculation.
+                calculate(terms, Decimal(0))
+                required = condition["financial_checks"]
+                if "spoken_duration" in required:
+                    if preview_only:
+                        outcome = "deferred_to_audio_analysis"
+                        explanation = "Supported billing rule: actual billable spoken duration will be measured from speech activity after generation; total recording length is not substituted. This preview does not verify speech duration."
+                    elif (
+                        measurement.get("measurement_uncertain") or measurement.get("spoken_seconds") is None
+                    ):
+                        explanation = "The approved speech-only billing condition needs a reliable spoken-duration measurement; total recording length cannot replace it."
+                    else:
+                        calculate(terms, Decimal(measurement["spoken_seconds"]))
+                        outcome = "satisfied"
+                        explanation = "The royalty engine uses measured spoken seconds, excluding time outside estimated speech activity. Total recording length is not used as billable speech; final artist review remains required."
+                else:
+                    outcome = "satisfied"
+                    explanation = "The deterministic royalty engine retains fractional spoken seconds using Decimal arithmetic and rounds only the final monetary amount to two decimal places with ROUND_HALF_UP."
+            except (ValueError, ArithmeticError):
+                outcome, explanation = (
+                    "needs_review",
+                    "Approved financial rules or spoken-duration evidence cannot be applied safely by the deterministic engine.",
+                )
         check(code, outcome, explanation, "special_conditions")
+        if kind == "financial" and source_review is not None:
+            checks[-1]["citations"] = [
+                citation
+                for citation in checks[-1]["citations"]
+                if citation.get("verified") and compact(condition["text"]) in compact(citation["quote"])
+            ]
+            if not checks[-1]["citations"]:
+                checks[-1]["outcome"] = "needs_review"
+                checks[-1]["explanation"] = (
+                    "This financial condition lacks a verified supporting contract quotation; human source review is required."
+                )
+                reasons.append(checks[-1]["explanation"])
         checks[-1]["kind"], checks[-1]["condition"] = kind, condition["text"]
     if measurement.get("measurement_uncertain") or measurement.get("spoken_seconds") is None:
         reasons.append("Speech measurement is uncertain or unavailable; total duration is not substituted.")

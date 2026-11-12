@@ -3,6 +3,7 @@ import "./globals.css";
 import "./workspace-theme.css";
 import "./experience.css";
 import "./stage-theme.css";
+import "./passport.css";
 
 export const metadata: Metadata = {
   title: "FairModel — Every voice deserves a fair share.",

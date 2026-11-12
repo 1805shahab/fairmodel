@@ -561,9 +561,11 @@ test("report distinguishes workflow evidence and omits empty or unverified quota
     .getByText("Administrative workflow conditions", { exact: true })
     .click();
   await expect(
-    page.getByText("Studio upload and review-request receipts are present.", {
-      exact: true,
-    }),
+    page
+      .locator("#compliance-report")
+      .getByText("Studio upload and review-request receipts are present.", {
+        exact: true,
+      }),
   ).toBeVisible();
   await expect(
     page.getByText(

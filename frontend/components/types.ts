@@ -143,6 +143,7 @@ export interface ReportResult {
     explanation: string;
     kind?: string;
     condition?: string;
+    citations?: Evidence[];
   }[];
   substantiated_violations?: { rule: string; explanation: string }[];
   overlap?: { asset_id: string; kind: string; basis: string }[];
@@ -197,6 +198,7 @@ export interface Asset {
   invoice_state?: string;
   workflow_stage?: string;
   next_action?: string;
+  provenance?: { transcription: string; compliance: string };
 }
 export interface ComparedAsset {
   id: string;
@@ -249,6 +251,12 @@ export interface OverlapDetail {
   } | null;
 }
 export interface Invoice {
+  events?: {
+    id: string;
+    kind: string;
+    created_at: string;
+    simulated: boolean;
+  }[];
   id: string;
   provider_id: string;
   royalty_id: string;
@@ -257,7 +265,6 @@ export interface Invoice {
   recipient: string;
   status: string;
   created_at: string;
-  events?: { id: string; kind: string; created_at: string }[];
   eligible_for_send?: boolean;
   provider?: "mock" | "paypal_sandbox";
   simulated?: boolean;

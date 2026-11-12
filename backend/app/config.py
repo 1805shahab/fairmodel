@@ -12,6 +12,16 @@ class Settings(BaseSettings):
     storage_dir: Path = Path("storage")
     gemini_api_key: SecretStr = SecretStr("")
     gemini_model: str = "gemini-3.1-flash-lite"
+    gemini_tts_model: Literal["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"] = (
+        "gemini-3.8-flash-lite-tts"
+    )
+    gemini_voice_replication_model: Literal["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"] = (
+        "gemini-3.8-flash-tts"
+    )
+    enable_voice_generation: bool = False
+    fish_api_key: SecretStr = SecretStr("")
+    fish_tts_model: Literal["s2.1-pro-free"] = "s2.1-pro-free"
+    enable_fish_generation: bool = False
     groq_api_key: SecretStr = SecretStr("")
     groq_whisper_model: str = "whisper-large-v3-turbo"
     payment_provider: Literal["mock", "paypal_sandbox"] = "mock"

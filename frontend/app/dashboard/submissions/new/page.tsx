@@ -1,5 +1,6 @@
 "use client";
 import FileDropzone from "@/components/file-dropzone";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -29,6 +30,11 @@ export default function NewSubmission() {
         eyebrow="CREATE WITH PERMISSION"
         title="Submit audio"
         description="Connect your campaign to an approved license. We’ll measure speech and review the usage."
+        action={
+          <Link className="button secondary" href="/dashboard/generate">
+            Generate advertisement with Gemini
+          </Link>
+        }
       />
       {role !== "studio" ? (
         <ErrorPanel message="Switch to Studio view to upload a campaign asset." />

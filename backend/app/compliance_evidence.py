@@ -93,6 +93,9 @@ def evidence_context(db, asset, analysis, license_, version) -> dict:
             if usage_state(db, prior_asset, [])["reconciliation_required"]:
                 cumulative_conflict = True
                 break
+    from .passports import review_context
+
+    case_context = review_context(db, asset, usage.get("member_asset_ids", [asset.id]))
     return {
         "source": source_evidence(Terms.model_validate(version.terms), license_.pages),
         "workflow": {
@@ -104,4 +107,5 @@ def evidence_context(db, asset, analysis, license_, version) -> dict:
         "overlap": signals,
         "usage": usage,
         "cumulative_reconciliation_required": cumulative_conflict,
+        **({"review_cases": case_context} if case_context["cases"] else {}),
     }
