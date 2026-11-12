@@ -1,10 +1,12 @@
 # Three-minute FairModel demonstration
 
+**Current recorded demo — November 12:** use the 2:59 edit and timed voiceover in ignored `output/video/`. Live Gemini extracted 19 citations; live Groq plus local audio tools measured 69.613 total / 58.38 speech seconds. Fictional-demo manual review and deterministic rules produced USD 56.76; no invoice exists for that new case. The ending refreshes a separate earlier owner-paid USD 17.46 Sandbox invoice as PAID/zero outstanding. Fish footage is a saved success, not a new request. No new send/payment or private voice transfer occurred in filming. Add narration, review permissions and upload publicly to YouTube; no public video URL has been supplied. See [submission checklist](HACKATHON_SUBMISSION.md). Older preparation examples below remain reproducible but are not the latest video script.
+
 Current routing update (November 10): FairModel is one application. `/` introduces the product and opens the same `/dashboard`; `/control-room` redirects there; the former fictional preview is retired. Artist/studio roles share the working UI. Standard backend startup selects actual PayPal Sandbox, with default-off draft/send writes; local simulation requires `-MockPayments`. Historical preview descriptions below document earlier milestones, not a second available app. See docs/APP_WORKFLOW.md.
 
 ## Actual Sandbox variant
 
-The repeatable offline scenarios below remain mock-only; `seed_demo.py` refuses a Sandbox-selected server. To demonstrate actual PayPal, follow [PAYPAL_SANDBOX_TESTING.md](PAYPAL_SANDBOX_TESTING.md) and the live variant in [DEMO_SCRIPT.md](DEMO_SCRIPT.md). OAuth/read-only access succeeded; draft/send/buyer-payment verification is pending explicit owner actions. Do not describe the offline cases as PayPal transactions.
+The repeatable offline scenarios below remain mock-only; `seed_demo.py` refuses Sandbox selection in its runtime. To demonstrate a new PayPal case, follow [PAYPAL_SANDBOX_TESTING.md](PAYPAL_SANDBOX_TESTING.md) with case-specific review/authorization. The existing owner's paid case can be shown as historical settlement evidence, separately from a new calculation. Do not describe offline cases as PayPal transactions.
 
 For the new original recording, `prepare-sandbox-demo.ps1` and `measure_sandbox_demo.py --live-ai` passed real local processing, Groq transcription and Gemini extraction/content smoke checks. Actual speech is 70.23s here; the sample rule conditionally estimates USD 80.46. Owner-reviewed database agreement/authorization/approval are still required. No invoice was created.
 
@@ -16,6 +18,7 @@ From the repository root, with existing base fixtures:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-scenarios.ps1
+$env:PAYMENT_PROVIDER = 'mock'
 Set-Location backend
 .\.venv\Scripts\python.exe ..\scripts\seed_demo.py
 Set-Location ..

@@ -1,5 +1,7 @@
 # Sponsor integrations: verified scope
 
+**Latest evidence — November 12, 2026:** the owner-deployed Render preview is separate from durable local payment evidence. Recording used live Gemini/Groq, actual AG Grid filtering/detail/CSV, the sponsor guidance page and guarded Postman download. A saved Fish success was shown without a new generation request. A real status refresh verified the earlier owner-paid USD 17.46 Sandbox invoice as PAID/zero outstanding; no new invoice/send/payment was performed during filming. The new filmed royalty is USD 56.76 and has no invoice. APIMatic remains used developer guidance, not an Invoicing runtime SDK; Postman execution, AG Studio and live webhook delivery are not claimed. Earlier dated verification paragraphs below describe the original milestone. See [current submission evidence](HACKATHON_SUBMISSION.md).
+
 ## APIMatic PayPal Context Plugin
 
 Installed with the exact requested command, from FairModel: `npx context-plugins install paypal`. System tools were detected without reinstallation: Node v26.13.0, npm/npx 11.20.0. Registry metadata identified the official `apimatic/context-plugins-installer` source. The installer reported successful Codex marketplace/plugin installation. The installed `plugin.json` independently identifies **paypal 0.4.1**, author APIMatic, MIT license.
@@ -32,6 +34,6 @@ The existing application already used AG Grid Community; it remains in use. The 
 
 Prepared `postman/FairModel.postman_collection.json` with 19 local API requests: health, integration diagnostic, licenses, media/report, authorizations, royalties, invoice preview/create/get/send/refresh and analytics. It contains placeholders, no client credentials/tokens. Mutations have a pre-request skip guard (`allow_explicit_writes=false`); Sandbox financial confirmations also default false. Import and manually inspect before enabling a particular action. The collection was structurally validated locally; **it was not run in the Postman app**, and exporting it is not proof of live payment success. See [Postman's skip-request behavior](https://learning.postman.com/docs/tests-and-scripts/write-scripts/postman-sandbox-reference/pm-execution).
 
-## Evidence and limits
+## Earlier installation milestone: evidence and limits
 
 Live Sandbox OAuth and read-only invoice-list access succeeded. No Sandbox invoice creation, sending, payment or cancellation has been performed without the owner's separate approval. Webhook code is mock-tested; no public endpoint or live delivery is claimed. Exact final test counts are in PLAN.md and the development report. The previous cinematic preview is retired from application routing. One Settings & integrations page links to the actual Community ledger and the guarded Postman collection at `/api/tools/postman`. APIMatic PayPal 0.4.1 manifest/Python guidance and the cached SDK map were rechecked on November 10; actual OAuth and read-only Invoicing succeeded again. No live financial write was performed.

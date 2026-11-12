@@ -1,36 +1,42 @@
-# PayPal Sandbox readiness
+# PayPal Sandbox readiness — November 12, 2026
 
-The owner's Sandbox implementation authorization supersedes the earlier account-blocked plan. Production APIs remain forbidden. Historical mock records remain simulated. **Actual Sandbox invoice/payment end-to-end verification is outstanding.**
+Actual Sandbox integration supersedes the historical account-access deferral. Production endpoints remain unsupported. Historical mock records are simulations. One genuine owner-completed Sandbox payment has been refreshed and verified paid; that is not a claim of production readiness or permission for another financial operation.
 
-## Implemented and mock-tested
+## Implemented and automated with mocked provider HTTP
 
-- [x] OAuth client credentials, secret-safe errors, expiry cache, credential rotation and unauthorized-token refresh.
-- [x] Fixed Sandbox host; production environment rejected; credentials not required for mock startup.
-- [x] Positive approved royalty → typed Invoicing v2 draft. Current compliance, identity/use, overlap and evidence-bound artist charge approval are required.
-- [x] Additive schema 4: consistent backup, unique durable create/send intents, actual provider ID mapping, authoritative snapshots and webhook receipts.
-- [x] Separate artist send; no draft/send at startup, migration, analysis or automated test.
-- [x] Read/refresh, actual returned trusted payment URL, distinct pending/partial/paid/cancelled/refund/manual-external states.
-- [x] Unknown write outcomes held for reconciliation without blind POST replay; concurrent confirmed creates allocate once.
-- [x] Signature verification, unique event IDs, replay/out-of-order reconciliation against authoritative GET.
-- [x] Artist/studio ownership, stored-provider routing, mock-only simulation, provider-specific labels and UI confirmations.
-- [x] AG Grid Community filters/export, guarded placeholder Postman collection and manual testing scripts.
+- [x] Backend OAuth client credentials, expiry cache and safe token/credential failures.
+- [x] Fixed Sandbox host; production environment rejected; no credentials needed for mock startup.
+- [x] Eligible positive royalty → typed Invoicing v2 draft with current contract/compliance/identity/use/overlap/artist charge approval checks.
+- [x] Durable unique create/send operation intents committed before remote writes; actual returned IDs and uncertain-outcome reconciliation without blind POST replay.
+- [x] Separate confirmed artist sending; no startup, migration, analysis or normal test sends invoices.
+- [x] Authoritative refresh and separate pending/partial/paid/cancelled/refund/manual-external states, with matching amounts and actual payment evidence.
+- [x] Signature verification, unique webhook receipts, replay/out-of-order protection and authoritative GET reconciliation.
+- [x] Role/ownership checks, stored-provider routing, simulation only for mock records, distinct Sandbox/mock notices.
+- [x] Actual-record AG Grid, guarded Postman collection and separate manual test tools.
 
-## Verified live
+## Actual live evidence
 
-- [x] Owner-configured credentials loaded through runtime settings without displaying them.
-- [x] Sandbox OAuth succeeded.
-- [x] Invoicing v2 read-only list succeeded (`VERIFIED_READ_ONLY`). This does not prove create/send permission or payload acceptance.
-- [x] New first-party stock-TTS recording measured locally; actual Groq and Gemini smoke calls succeeded. No agreement activation, artist attestation, royalty or invoice was created by preparation.
+- [x] Owner-configured Sandbox OAuth and authenticated invoice reads succeeded without printing credentials/tokens.
+- [x] Genuine USD 17.46 draft returned a real remote ID. Owner-corrected issuer binding was reconciled through GET-only repair with backup, matching evidence and original-intent audit preservation; no duplicate draft was created.
+- [x] Owner completed sending/buyer payment outside the filming task. On November 12, the authorized captured refresh queried PayPal and verified the existing case as PAID, USD 17.46 paid and zero outstanding.
+- [x] The film clearly separates that earlier payment from the new USD 56.76 calculation, for which no invoice was created. No new draft/send/payment/cancellation occurred during filming.
+- [x] The filming preservation check confirmed 316 pre-existing rows across 22 tables and 52 pre-existing media files unchanged against the pre-filming backup; database integrity/foreign keys passed.
 
-## Owner actions and remaining verification
+## Before each new local Sandbox test
 
-- [ ] Configure distinct Sandbox business merchant and personal buyer emails. No passwords or tokens in chat/app.
-- [ ] Review actual demo agreement/audio and attest truthfully to identity/use; resolve overlap and approve the actual eligible charge.
-- [ ] Review concrete amount/recipient/payload and authorize one actual draft; enable draft writes for that process and inspect returned ID/details.
-- [ ] Separately authorize sending that invoice; enable sending, confirm and inspect actual status/payment URL.
-- [ ] Manually complete buyer test payment on the actual PayPal-hosted Sandbox page.
-- [ ] Refresh and verify actual payment totals/PayPal evidence; check persistence after restart for this actual case.
-- [ ] Optional: authorize/configure reachable webhook listener and `PAYPAL_WEBHOOK_ID`; verify real signature/delivery. No tunnel or public endpoint is configured.
-- [ ] Record actual successful sequence and update submission claims. Do not claim completion until it happens.
+- [ ] Use distinct real Sandbox business issuer and personal buyer matching the configured merchant app; no passwords/tokens in FairModel or public docs.
+- [ ] Review the actual agreement, audio, campaign, speech measurement and artist attestation; resolve overlap/open cases and approve the specific eligible positive charge.
+- [ ] Explicitly authorize its amount/currency/recipient before enabling draft writes and confirming creation.
+- [ ] Separately authorize/confirm sending; inspect actual provider ID, status and returned payment link.
+- [ ] Buyer completes test checkout on the PayPal-hosted Sandbox page, then refresh status and inspect totals/events.
+- [ ] Confirm the particular case's persistence after a controlled restart before making restart guarantees. Do not reset records or retry unknown writes to make a demo pass.
 
-Commands: [PAYPAL_SANDBOX_TESTING.md](PAYPAL_SANDBOX_TESTING.md). Sponsor evidence: [SPONSOR_INTEGRATIONS.md](SPONSOR_INTEGRATIONS.md). Owner-provided deadline: November 12, 2026, 12:00 PM PST (November 13, 1:00 AM Pakistan time); confirm the portal's final cutoff directly.
+## Remaining limitations and submission work
+
+- [ ] Configure an approved reachable webhook endpoint and verify actual signature/delivery. No automatic tunnel/public receiver setup is authorized; the free hosted shared gate is unsuitable as-is.
+- [ ] Verify more actual partial/pending/refund and out-of-order scenarios under separate explicit authorization; current coverage is mocked.
+- [ ] Verify the final buyer journey on any new account/case instead of inferring it from old paid evidence.
+- [ ] Keep Render Free draft/send disabled because operation history is ephemeral. Durable storage, production authentication, merchant onboarding and production payments require separate work.
+- [ ] Publish the reviewed source/license and publicly upload/link the narrated under-three-minute demo; see [submission guide](HACKATHON_SUBMISSION.md).
+
+Commands and safe error recovery: [Sandbox testing](PAYPAL_SANDBOX_TESTING.md). Detailed sponsor contribution: [sponsor integrations](SPONSOR_INTEGRATIONS.md). Fresh setup: [README](../README.md). Exact historical results and backups: [PLAN](../PLAN.md).

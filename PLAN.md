@@ -1,3 +1,48 @@
+# Authorized GitHub documentation publication — November 13, 2026
+
+- [x] Owner requested pushing the completed changes to the existing GitHub repository. Fetched `origin`; local main and remote main matched before publication, with no incoming commits or history rewrite needed.
+- [x] Reviewed the 17 changed/new documentation/license/ignore files, 77 relative links/anchors and Git whitespace. Secret-pattern review found no unintended credential patterns; the sole shared website login is the owner's explicit publishing exception. Root MIT license, notices, setup, latest story, verified evidence and demo limitations are included.
+- [x] Backend/frontend/provider/configuration/Postman files are unchanged. `.env`, databases, uploads, portable tools, QA artifacts and `output/video/` remain excluded. The thumbnail folder is no longer present locally; no video or thumbnail binary is part of this publication. Full application suites were not rerun for documentation-only changes.
+- This entry records authorization and verified pre-publication review. Push outcome is checked against the actual remote branch and reported separately; no repository visibility change, Render deployment or external video upload is authorized by this push.
+
+# Voice-generation feature and story clarification — November 13, 2026
+
+- [x] README now explicitly distinguishes artist-authorized Fish reference-conditioned generation (saved successful result, owner-reported resemblance, no independent biometric verification) from the filmed stock-voice walkthrough and separate historical paid Sandbox case.
+- [x] Added copy-ready `docs/PROJECT_STORY.md` with the requested seven Markdown headings and linked it from README/submission guidance. No new live generation, voice transfer, financial action, application/config change, push or publication.
+
+# Video and submission thumbnail — November 12, 2026
+
+- [x] Used the built-in image-generation tool for a coherent FairModel paper/ink/vermilion marketing cover, with original waveform sculpture and readable voice/royalty headline. No provider logos, paid/identity claims, transaction amounts or private application data.
+- [x] Saved the unchanged generated master and aspect-preserving 1280×720 JPEG / 1920×1080 PNG exports in `output/thumbnails/`, with the exact prompt/provenance notes. Verified formats/dimensions and visually reviewed the JPEG for text/cropping. JPEG is 302,705 bytes; PNG is 3,338,190 bytes. No application/configuration changes, push or external upload.
+
+# Owner-authorized shared hosted-demo access — November 12, 2026
+
+- [x] Added the supplied temporary Render website login once in README, with canonical links from deployment, submission and API setup guides. Updated access wording to distinguish intentionally shared judging access from private new deployments and backend provider credentials. No `.env` read/change, authentication attempt, account/config change, push or deployment performed.
+- [x] Documented that shared access exposes both demo personas, hosted records and enabled AI features; fictional/authorized material only, temporary storage and disabled hosted PayPal draft/send remain explicit. This owner-requested exception never authorizes publishing AI keys, PayPal/buyer credentials or tokens.
+- [x] Checked 45 relative links/anchors and Git whitespace; the supplied shared password appears only once in the reviewed access documentation, without printing it in verification output. Application/configuration/Postman files remain unchanged. Login remains owner-provided, not independently tested by this task.
+
+# Owner voiceover and narrated submission cut — November 12, 2026
+
+- [x] Decoded the owner-supplied AAC fully: 191.123458s, 9,173,926 samples at 48kHz. Processed entirely locally with installed Windows offline phrase alignment, WebRTC VAD pauses and FFmpeg; no provider request, account action, model download or private third-party transfer.
+- [x] Exported ignored `output/video/FairModel-hackathon-demo-NARRATED-1080p.mp4`: 179.000s, 1920×1080 H.264/AAC. Complete narration fitted at 1.073727× tempo (7.37% faster), pitch preserved, no voice/silence trimming; light high-pass/loudness normalization. Re-timed all picture chapters to narration. Original source AAC and both prior MP4s hash-preserved.
+- [x] Last narration sample ends at 178.366s; no ending cut. A 2.2s original stock-ad excerpt sits within the actual narrator pause. Final integrated loudness -16.26 LUFS, true peak -4.37 dBTP. Whole movie decode passes; browser load/seek/play at sample, PayPal and closing stages passes with no media errors. Six reviewed frames include source clauses, royalty, separate historical settlement and end cards. Safe verification/chapter notes remain private and ignored alongside output.
+- [x] README/submission/local-delivery notes now identify the narrated final; paid historical USD 17.46 and new uninvoiced USD 56.76 remain separate. No backend/frontend/config/provider/business change, push, live AI/financial action or upload. Public YouTube upload and media-permission review remain owner actions.
+
+# Judge-facing documentation and open-source preparation — November 12, 2026
+
+- [x] Replaced chronological/stale README checkpoint notes with product/audience/use-case overview, actual workflow/architecture, provider/sponsor boundaries, from-scratch Windows locked install, explicit offline versus live paths, Sandbox safeguards, isolated test commands, data/hosting limits, troubleshooting and prioritized future work.
+- [x] Added root MIT LICENSE and third-party/font/media notices; prepared current submission description, judging evidence, video/public-repository checklist and required manual publishing steps. Updated architecture/sponsor/testing summaries to distinguish the newly verified paid refresh/saved Fish success from historical unverified checkpoints.
+- [x] Verified 63 relative links/anchors across 10 documentation files, all 13 README PowerShell blocks with the PowerShell parser, referenced setup files/npm scripts, MIT notice and Git whitespace checks. Commands were syntax-checked, not executed as a new installation; no fresh dependency install or full application-suite rerun is claimed for documentation-only changes. Backend/frontend/provider/config/Postman code remains unchanged. Link report is ignored at `.tmp/readme-verification/report.json`.
+- [ ] Owner publication tasks remain: review source/history and contributor/media permissions, make/verify repository public, push the reviewed license/docs when authorized, add narration and upload the under-three-minute video publicly to YouTube, supply hosted demo credentials privately and submit the actual form. No account visibility change, push, upload, live AI or financial operation performed by this documentation task.
+
+# Recorded walkthrough delivery — November 12, 2026
+
+- [x] Owner authorized fictional stock-voice materials and live Gemini/Groq, plus refreshing the existing paid USD 17.46 Sandbox invoice. Recorded actual browser uploads, contract extraction/source review/activation, campaign forms, audio analysis, compliance error recovery, manual fictional-demo attestation, charge review, private passport, saved Fish history, AG Grid and sponsor tools.
+- [x] New license `5258b3ef004149d6b7fd523c6ff39669` version 4 and asset `6181c29bdeef4d28a909e8bb60efa21a`: live Gemini extraction with 19 citations, live Groq transcription, FFprobe 69.613s total / WebRTC VAD 58.38s speech. Initial Gemini HTTP 503 remained visible; deliberate retry and subsequent live reevaluation succeeded without fixture fallback. Backend royalty USD 56.76; manual fictional-demo approval recorded. No invoice created for this case; stock voice/manual review is not biometric evidence or a cloning grant.
+- [x] Actual read-only PayPal refresh returned PAID / USD 17.46 for prior invoice `INV2-MUQX-PHVE-HXBM-RAV2`, zero outstanding. Film explicitly distinguishes this earlier case from the new USD 56.76 example. No new draft/send/payment/cancellation, voice generation, private third-party voice transfer, deployment or push during filming.
+- [x] Exported 1920×1080 H.264/AAC MP4s: 2:59 hackathon edit and 5:38 complete walkthrough, timed short/full voiceover transcripts and clean narration text in ignored `output/video/`. These are edited actual captures, not an uninterrupted take. Narration has not been recorded; audio contains one five-second original stock-ad excerpt and silence elsewhere. Fish footage is a saved earlier success; Postman collection download is not a Postman test execution.
+- [x] Both entire MP4s decode without errors and pass browser load/seek/play checks. Reviewed 24 short-edit keyframes including source evidence, manual reviews, payment provenance and end cards. All 52 pre-existing media files hash-identical; 316 pre-existing rows across 22 tables unchanged against the pre-filming backup; SQLite integrity and foreign keys pass, new-case invoice count zero. Backup/raw captures: ignored `.tmp/fairmodel-film/`. No application/provider/API/schema changes; code suites not rerun for media-only delivery.
+
 # Render Free deployment preparation — November 12, 2026
 
 - [x] Owner selected free-only hosting after persistent-disk limitation was explained. One Docker web service packages both apps; FastAPI stays loopback-only. No paid services, external resources or account operations created.

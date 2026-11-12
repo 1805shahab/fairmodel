@@ -4,10 +4,10 @@ Only `https://api-m.sandbox.paypal.com` is used. Production is rejected. Mock an
 
 ## Verified versus pending
 
-- **November 11 owner-requested retest:** fresh live OAuth and authenticated invoice-list access pass; the running local backend reports `paypal_sandbox`. Both test-email settings are configured and distinct. The 38 PayPal tests pass in 15.00s using mocked HTTP, with one existing Starlette warning. Read-only original-database preflight finds five royalties/four historical invoices and no eligible uninvoiced positive royalty: the remaining uninvoiced case is USD 0.00 / NO_CHARGE. There are zero Sandbox invoices/operation intents; integrity/foreign keys pass. Prepare a new eligible artist-approved case before requesting a specific draft test. No real draft/send/payment was performed; webhook remains unconfigured.
-- **Live verified:** backend OAuth client credentials; authenticated read-only Invoicing v2 invoice-list capability. No credential/token output.
+- **November 12 current evidence:** the existing owner-completed USD 17.46 Sandbox invoice was refreshed through FairModel against PayPal and returned PAID, paid total USD 17.46 and zero outstanding. Its real draft had previously been reconciled after the owner corrected the issuer email. The recording shows a status refresh, not a new draft/send/buyer checkout. It is separate from the new filmed USD 56.76 royalty, which has no invoice. Existing runtime rows/media were preserved. See PLAN.md and the current submission guide for the precise verification scope.
+- **Live verified:** backend OAuth, authenticated Invoicing reads, a genuine saved invoice and authoritative paid status for the owner-completed case. No credentials/tokens displayed; no production money or new financial action during filming.
 - **Implemented and mock-tested:** draft payload/create, durable duplicate claims, uncertain-create search reconciliation, separate send, actual-ID retrieval, refresh, partial/pending/full/refunded states, merchant/recipient/amount checks and verified/idempotent webhooks.
-- **Live not yet performed:** draft creation, sending, buyer payment, full settlement or webhook delivery. Each needs the owner's relevant explicit authorization; account emails and supported artist review are still required. Read access does not prove write permission.
+- **Still pending:** public webhook delivery and broader real pending/partial/refund/replay scenarios. Each new draft/send/payment/cancellation test requires its own reviewed authorization. A previously paid invoice or read access does not authorize a new financial operation.
 
 ## Configure test accounts without exposing secrets
 

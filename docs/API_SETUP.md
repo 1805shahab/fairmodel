@@ -1,5 +1,7 @@
 # API and local tool setup
 
+For the existing hosted preview, use the owner-published [shared website demo login](../README.md#hosted-demo-login). Those values unlock the browser entrance only; they are not provider credentials or a PayPal login. Anyone with shared access can switch demo personas and use enabled features, so keep hosted inputs fictional/authorized. API keys remain backend-only and must never be added to public documentation.
+
 Render Free has a separate [deployment guide](RENDER_DEPLOYMENT.md). Enter provider
 keys privately in Render's Environment tab; do not upload `.env`. The prepared
 host is a password-protected ephemeral demo, with fresh temporary records and

@@ -1,5 +1,11 @@
 # Render Free: temporary FairModel demonstration
 
+## Existing hosted preview: judge access
+
+The owner-deployed preview is [fairmodel.onrender.com](https://fairmodel.onrender.com). The owner explicitly authorized publishing its shared website username/password for judging; copy the current values from [README — Hosted demo login](../README.md#hosted-demo-login). Enter them in the browser's login prompt, without quotation marks. This is website access, not a PayPal buyer login or provider API credential. The provided login was documented, not independently authenticated by this update.
+
+This is now intentionally shared demonstration access: anyone with it can switch both personas, inspect hosted records and use enabled AI features. Use fictional/authorized materials only. Keep all provider secrets private and PayPal draft/send disabled. For a new deployment with confidential data, generate separate access credentials and do not reuse or publish the shared judging password. The fresh-deployment instructions below describe that separate setup.
+
 This deployment packages the existing Next.js frontend, Python 3.12 backend and
 FFmpeg into **one Docker web service**. Only Next.js listens publicly on Render's
 `PORT`; FastAPI listens on `127.0.0.1:8000` inside the same container. The existing
@@ -55,7 +61,9 @@ same-origin API proxy and application workflows remain in place.
    `DEMO_ACCESS_PASSWORD` privately. Username is `fairmodel`. Do not paste the
    password into chat, commit it or put it in the URL. Open the service's actual
    `https://...onrender.com` URL and enter these values in the browser sign-in box.
-   Share the URL and demo credentials privately with judges.
+   For a private new deployment, share its credentials only with invited reviewers.
+   The existing owner-authorized shared judging preview is the explicit exception
+   documented above; never publish provider keys or account passwords with it.
 7. To enable real AI, add the backend variables below in Render Environment and
    save/redeploy. Enter values privately from your own configuration. This
    redeploy loses cloud demonstration data, so configure keys **before** uploads.

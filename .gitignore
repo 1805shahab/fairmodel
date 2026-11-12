@@ -19,6 +19,7 @@ frontend/playwright-report/
 frontend/test-results/
 *.tsbuildinfo
 /tools/
+/output/video/
 .tmp/
 .taste-skill/
 *.log

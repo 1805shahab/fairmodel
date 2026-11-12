@@ -1,6 +1,8 @@
 # Three-minute FairModel judging script
 
-November 11 product upgrade: use **Voice usage passport** as the evidence hub after showing analysis. Select Medium in the explorer, open its real PDF clause, then show independent authorization/royalty/payment stages. Show the Studio simulator's 45s → USD 30 preview as explicitly conditional and no-write. The Review Center can show an existing fictional concern/response/resolution; do not replace real artist attestation or initiate a payment for this segment. Keep the existing three-minute structure by shortening repeated table navigation. Print/save a private snapshot only if needed; it is not a legal or biometric certificate. Actual paid Sandbox evidence still requires the separately approved real test.
+**Latest recorded cut — November 12:** the actual 2:59 MP4 and matching timed/clean narration text are in ignored `output/video/`. Current [submission guide](HACKATHON_SUBMISSION.md#three-minute-presentation-structure) describes its exact chapters. The filmed USD 56.76 calculation and the separately refreshed earlier paid USD 17.46 Sandbox invoice are different cases; never narrate them as one payment. The cut shows a saved Fish success, not new generation. The suggestions below are earlier/future rehearsal variants, not claims that every action was captured in the latest edit.
+
+November 11 product upgrade: use **Voice usage passport** as the evidence hub after analysis. Open a real PDF clause, then show independent authorization/royalty/payment stages. A Studio simulator 45s → USD 30 preview is conditional and no-write. Review Center can show a fictional concern/response/resolution; it does not replace artist attestation or authorize payment. A private snapshot is not a legal or biometric certificate. Any new live financial test still requires its own explicit approval.
 
 ## Live AI + actual Sandbox variant (prepare before recording)
 

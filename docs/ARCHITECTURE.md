@@ -1,5 +1,9 @@
 # Architecture
 
+## Current verification summary — November 12, 2026
+
+The current interface uses warm paper/ink/vermilion, full-width navigation and a public landing page at `/`; `/control-room` redirects to the single `/dashboard`. Schema 7 includes provider-bound grants/generation intents. Live Gemini extraction/compliance and Groq transcription were recorded using fictional stock-voice materials; a saved successful Fish generation was inspected. An existing owner-paid USD 17.46 PayPal Sandbox invoice was refreshed against PayPal and verified PAID with zero outstanding. That invoice is separate from the new USD 56.76 filmed royalty, which has no invoice. Live Gemini replication and public webhook delivery remain unverified. The owner has deployed the temporary Render preview; cloud provider behavior is not established by local tests. See the [current overview and fresh setup](../README.md) and [submission guide](HACKATHON_SUBMISSION.md). Earlier dated verification statements below describe their original checkpoints.
+
 ## Optional Render Free demonstration
 
 The root Dockerfile builds Next.js standalone only for the hosted image, then
@@ -19,7 +23,7 @@ November 11 voice-generation addition: schema 6 adds `VoiceGrant` and `SpeechGen
 
 ## Product presentation - November 10, 2026
 
-The working workspace uses a responsive sidebar and semantic tokens in `frontend/app/workspace-theme.css`. Controlled recording tabs separate processing, compliance, authorization and finance. Hidden panels stay mounted during tab changes; data refreshes retain the selected tab. Timestamp buttons seek the native audio element. Invoice filtering uses returned records only; provider confirmation payloads, writes and evidence checks remain unchanged. Both `/` and the retired `/control-room` route redirect to the single working `/dashboard`. This redesign requires no schema or provider changes; see DESIGN.md.
+The working workspace uses full-width navigation and semantic paper/ink/vermilion tokens in `frontend/app/workspace-theme.css`. Controlled recording tabs separate processing, compliance, authorization and finance. Hidden panels stay mounted during tab changes; data refreshes retain the selected tab. Timestamp buttons seek the native audio element. Invoice filtering uses returned records only; provider confirmation payloads, writes and evidence checks remain unchanged. The public `/` landing opens the same `/dashboard`; the retired `/control-room` redirects there. See DESIGN.md and the current ledger UI report.
 
 ## Application boundary
 
@@ -31,7 +35,7 @@ The former cinematic preview route no longer imports its experience component, s
 
 ## Data model
 
-The working workspace uses neutral/teal product tokens in `app/workspace-theme.css`, with a navy sidebar and responsive role selector. API-backed forms, versioned approvals, audio reports, overlap decisions and invoice actions use the existing backend. AG Grid Community renders actual ledger rows. The Postman download route serves a fixed credential-free source collection, never an arbitrary file path. The standard backend launcher selects Sandbox with process-scoped variables; explicit `-MockPayments` selects simulation, with no failure fallback and no automatic financial operation.
+The working workspace uses a responsive demo-persona selector. API-backed forms, versioned approvals, audio reports, overlap decisions and invoice actions use the same backend. AG Grid Community renders actual ledger rows. The Postman download route serves a fixed credential-free source collection, never an arbitrary file path. The standard backend launcher selects Sandbox with process-scoped variables; explicit `-MockPayments` selects simulation, with no failure fallback and no automatic financial operation.
 
 - Persona: fictional Artist or Studio profile. Profile and demo user are combined for this MVP.
 - License: assigned artist/studio, source PDF/hash, page text, extracted/edited terms, processing state, extraction provenance and current version.
@@ -82,7 +86,7 @@ Schema-4 `PaymentOperation` uniquely claims each royalty/provider/create-or-send
 
 `SandboxInvoiceDetail` stores provider status, sanitized payment rows, paid/due/refunded totals, sync timestamps, actual trusted Sandbox link and safe errors. Currency, amount, issuer, recipient and reference must match the frozen intent. PAID requires authoritative GET status, matching paid total, zero due/refund and PayPal transaction evidence. Pending/partial/manual-external/refund states remain distinct; stale snapshots cannot roll back established settlement/refund evidence. Failed refresh preserves last good state and displays its error.
 
-Signature verification uses PayPal's official verification endpoint and configured webhook ID. Unique `WebhookReceipt` IDs prevent replay; events trigger current GET reconciliation, never event-named settlement. A hidden service actor distinguishes webhook processing from artist decisions. No public endpoint/tunnel is configured; direct status refresh works independently. Each invoice routes by stored provider; simulation remains mock-only. Live verification currently covers OAuth/read-only listing, not create/send/settlement.
+Signature verification uses PayPal's official verification endpoint and configured webhook ID. Unique `WebhookReceipt` IDs prevent replay; events trigger current GET reconciliation, never event-named settlement. A hidden service actor distinguishes webhook processing from artist decisions. No public endpoint/tunnel is configured; direct status refresh works independently. Each invoice routes by stored provider; simulation remains mock-only. The latest live verification includes refreshing an earlier owner-completed Sandbox payment as PAID; no new payment was executed during filming. Webhook delivery remains unverified.
 
 ## Development schema and operations
 
