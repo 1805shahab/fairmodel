@@ -1,5 +1,10 @@
 # API and local tool setup
 
+Render Free has a separate [deployment guide](RENDER_DEPLOYMENT.md). Enter provider
+keys privately in Render's Environment tab; do not upload `.env`. The prepared
+host is a password-protected ephemeral demo, with fresh temporary records and
+PayPal draft/send disabled. Local setup and existing runtime data are unchanged.
+
 Optional Fish generation: backend-only `FISH_API_KEY`, `FISH_TTS_MODEL=s2.1-pro-free`, `ENABLE_VOICE_GENERATION=true`, `ENABLE_FISH_GENERATION=true`, then restart. Do not replace `.env`. Fish requires its own artist grant and explicit studio selection. Paid models/profile creation/fallbacks are blocked. See [Fish setup, retention limits and manual test](FISH_AUDIO.md). Configuration does not verify live access.
 
 Gemini generation endpoints: `GET /api/references/{id}/audio` is artist-owned playback; `GET/POST /api/voice-grants` lists assigned grants or records artist consent for an approved version; `POST /api/voice-grants/{id}/revoke` is artist-only. `GET/POST /api/generations` lists owned jobs or explicitly requests studio Gemini generation with a stable request key. The resulting asset uses all existing analysis/compliance/financial endpoints; no generation endpoint approves a charge. See [Gemini setup and required recordings](GEMINI_VOICE_WORKFLOW.md). `ENABLE_VOICE_GENERATION` defaults false; the server-only key stays in the existing `.env`, which was not overwritten.

@@ -75,11 +75,11 @@ export default function VoiceStage({
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
     camera.position.set(0, 0, 4.9);
-    scene.add(new THREE.HemisphereLight(0xcdefff, 0x151525, 1.8));
+    scene.add(new THREE.HemisphereLight(0xfff8e9, 0x272019, 1.8));
     const light = new THREE.DirectionalLight(0xffffff, 5);
     light.position.set(-2, 4, 3);
     scene.add(light);
-    const rim = new THREE.DirectionalLight(0x59c8ff, 5);
+    const rim = new THREE.DirectionalLight(0xd8b79a, 5);
     rim.position.set(3, -1, -1);
     scene.add(rim);
     const warm = new THREE.DirectionalLight(0xffba81, 2);
@@ -88,7 +88,11 @@ export default function VoiceStage({
     const sculpture = new THREE.Group();
     scene.add(sculpture);
     const material = new THREE.MeshStandardMaterial({
-      color: 0xa9cbdc,
+      color: new THREE.Color(
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent")
+          .trim(),
+      ),
       roughness: 0.24,
       metalness: 0.58,
     });
@@ -107,7 +111,11 @@ export default function VoiceStage({
     }
     const haloGeo = new THREE.TorusGeometry(1.65, 0.003, 3, 120);
     const haloMat = new THREE.MeshBasicMaterial({
-      color: 0x476078,
+      color: new THREE.Color(
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--border")
+          .trim(),
+      ),
       transparent: true,
       opacity: 0.42,
     });

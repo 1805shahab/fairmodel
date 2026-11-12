@@ -1,7 +1,16 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileAudio, LoaderCircle, RefreshCw } from "lucide-react";
+import {
+  ArrowRight,
+  FileAudio,
+  LoaderCircle,
+  RefreshCw,
+  Check,
+  Clock3,
+  AlertTriangle,
+  Circle,
+} from "lucide-react";
 import { api, statusLabel } from "./api";
 import { useWorkspace } from "./workspace";
 
@@ -67,7 +76,15 @@ export function Badge({ status }: { status: string }) {
           : "slate";
   return (
     <span className={`pill ${color}`}>
-      <span className="status-dot" />
+      {color === "green" ? (
+        <Check size={12} aria-hidden="true" />
+      ) : color === "amber" ? (
+        <Clock3 size={12} aria-hidden="true" />
+      ) : color === "red" ? (
+        <AlertTriangle size={12} aria-hidden="true" />
+      ) : (
+        <Circle size={10} aria-hidden="true" />
+      )}
       {statusLabel(status)}
     </span>
   );
@@ -121,6 +138,11 @@ export function Loading() {
     <div className="loading loading-skeleton" role="status" aria-live="polite">
       <LoaderCircle className="spin" size={22} />
       Loading your workspace…
+      <span className="skeleton-lines" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
     </div>
   );
 }

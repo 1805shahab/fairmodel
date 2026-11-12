@@ -24,6 +24,9 @@ import {
   X,
 } from "lucide-react";
 import type { Role } from "./types";
+import ThemeToggle from "./theme-toggle";
+import * as Dialog from "@radix-ui/react-dialog";
+import SiteFooter from "./site-footer";
 
 interface WorkspaceContext {
   role: Role;
@@ -192,6 +195,7 @@ export default function Workspace({
             </Link>
             <span className="stage-edition">VOICE RIGHTS / WORKSPACE</span>
             <div className="stage-topbar-actions">
+              <ThemeToggle />
               <button
                 id="workspace-menu-toggle"
                 className="stage-launcher"
@@ -226,81 +230,99 @@ export default function Workspace({
           </nav>
           <div className="stage-utility-bar">
             <span className="stage-local-access">
-              <ShieldCheck size={12} /> Local role access · test payments only
+              <ShieldCheck size={12} /> Demo persona · test payments only
             </span>
             <nav aria-label="Workspace tools">
               {utilityLinks.map(navigationLink)}
             </nav>
           </div>
         </header>
-        {mobile && (
-          <>
-            <button
-              className="workspace-menu-scrim"
-              aria-label="Close navigation overlay"
-              onClick={() => setMobile(false)}
-            />
-            <aside
-              className="workspace-mobile-menu"
-              id="workspace-mobile-navigation"
-              aria-label="Workspace navigation"
-              role="dialog"
-              aria-modal="true"
+        <Dialog.Root open={mobile} onOpenChange={setMobile}>
+          <Dialog.Portal>
+            <Dialog.Overlay asChild>
+              <button
+                className="workspace-menu-scrim"
+                aria-label="Close navigation overlay"
+                onClick={() => setMobile(false)}
+              />
+            </Dialog.Overlay>
+            <Dialog.Content
+              asChild
+              aria-describedby="navigation-description"
+              onCloseAutoFocus={(event) => {
+                event.preventDefault();
+                document.getElementById("workspace-menu-toggle")?.focus();
+              }}
             >
-              <div className="workspace-mobile-heading">
-                <span className="eyebrow">YOUR WORKSPACE</span>
-                <button
-                  className="icon-button"
-                  aria-label="Close navigation"
-                  onClick={() => setMobile(false)}
+              <aside
+                className="workspace-mobile-menu"
+                id="workspace-mobile-navigation"
+                aria-label="Workspace navigation"
+                role="dialog"
+                aria-modal="true"
+              >
+                <div className="workspace-mobile-heading">
+                  <Dialog.Title className="eyebrow">
+                    Workspace navigation
+                  </Dialog.Title>
+                  <button
+                    className="icon-button"
+                    aria-label="Close navigation"
+                    onClick={() => setMobile(false)}
+                  >
+                    <X size={21} />
+                  </button>
+                </div>
+                <label className="stage-page-search">
+                  Find a page
+                  <input
+                    autoFocus
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Licenses, invoices, analytics…"
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        document
+                          .querySelector<HTMLElement>(
+                            "#workspace-mobile-navigation nav a",
+                          )
+                          ?.focus();
+                      }
+                    }}
+                  />
+                </label>
+                <nav aria-label="Mobile navigation">
+                  {links
+                    .filter((item) =>
+                      item.label.toLowerCase().includes(search.toLowerCase()),
+                    )
+                    .map(navigationLink)}
+                  <span className="workspace-menu-divider" />
+                  {utilityLinks
+                    .filter((item) =>
+                      item.label.toLowerCase().includes(search.toLowerCase()),
+                    )
+                    .map(navigationLink)}
+                </nav>
+                {![...links, ...utilityLinks].some((item) =>
+                  item.label.toLowerCase().includes(search.toLowerCase()),
+                ) && (
+                  <p className="small">
+                    No matching pages. Try “license” or “invoice”.
+                  </p>
+                )}
+                <Dialog.Description
+                  id="navigation-description"
+                  className="small"
                 >
-                  <X size={21} />
-                </button>
-              </div>
-              <label className="stage-page-search">
-                Find a page
-                <input
-                  autoFocus
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Licenses, invoices, analytics…"
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      document
-                        .querySelector<HTMLElement>(
-                          "#workspace-mobile-navigation nav a",
-                        )
-                        ?.focus();
-                    }
-                  }}
-                />
-              </label>
-              <nav aria-label="Mobile navigation">
-                {links
-                  .filter((item) =>
-                    item.label.toLowerCase().includes(search.toLowerCase()),
-                  )
-                  .map(navigationLink)}
-                <span className="workspace-menu-divider" />
-                {utilityLinks
-                  .filter((item) =>
-                    item.label.toLowerCase().includes(search.toLowerCase()),
-                  )
-                  .map(navigationLink)}
-              </nav>
-              {![...links, ...utilityLinks].some((item) =>
-                item.label.toLowerCase().includes(search.toLowerCase()),
-              ) && (
-                <p className="small">
-                  No matching pages. Try “license” or “invoice”.
-                </p>
-              )}
-              <p className="small">Arrow down to browse · Escape to close</p>
-            </aside>
-          </>
-        )}
+                  Arrow down to browse · Escape to close
+                </Dialog.Description>
+              </aside>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
         <div className="workspace-main" inert={mobile || switching}>
           <main
             className="page-content"
@@ -308,12 +330,20 @@ export default function Workspace({
             key={role}
             tabIndex={-1}
           >
+            <nav className="ledger-breadcrumb" aria-label="Breadcrumb">
+              <Link href="/dashboard">Workspace</Link>
+              <span aria-hidden="true">/</span>
+              <span>
+                {[...links, ...utilityLinks].find(
+                  (item) =>
+                    item.href !== "/dashboard" && path.startsWith(item.href),
+                )?.label || "Overview"}
+              </span>
+              <span className="ledger-persona">Demo persona: {role}</span>
+            </nav>
             {children}
           </main>
-          <footer className="workspace-footer">
-            <span>Every voice deserves a fair share.</span>
-            <span>FairModel · Local development</span>
-          </footer>
+          <SiteFooter compact />
         </div>
         {message && (
           <div className="toast" role="status">

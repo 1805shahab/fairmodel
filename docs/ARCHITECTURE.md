@@ -1,5 +1,18 @@
 # Architecture
 
+## Optional Render Free demonstration
+
+The root Dockerfile builds Next.js standalone only for the hosted image, then
+packages Node, Python 3.12 and FFmpeg together. A small supervisor runs FastAPI
+on loopback and Next.js on Render's public port, stops both on termination, and
+fails if either process fails. Existing domain/provider services are unchanged.
+A shared HTTP password gate protects pages and API handlers; it is a restricted
+demo entrance, not production identity. The public health endpoint exposes only
+readiness and checks no external providers. Temporary cloud storage is isolated;
+no local records or media enter the image. Because Render Free erases local
+files on idle/restart/redeploy, PayPal draft/send are blocked here. Original local
+financial history remains local. See [deployment limits and steps](RENDER_DEPLOYMENT.md).
+
 Fish addition (schema 7): grants/jobs are provider-bound. Legacy records remain Gemini; Fish requires separate transfer/retention consent and an artist-reviewed reference transcript. Its free-only adapter uses inline MessagePack references, creates no profiles, never retries/switches providers, and hands validated audio to the existing review/financial pipeline. Backed-up transactional migration expands grant uniqueness by provider without changing IDs/history. See [Fish details](FISH_AUDIO.md).
 
 November 11 voice-generation addition: schema 6 adds `VoiceGrant` and `SpeechGeneration` without modifying existing tables. Artist grants bind an owned reference plus separate adult-speaker consent clip to one exact approved license version and assigned studio. `voice_routes.py` enforces ownership, deterministic scope, durable idempotent intents and pre/post-provider grant validation; `voice_generation.py` uses maintained Google GenAI Voices/Interactions with stateless replication and discards the ephemeral voice key. A validated WAV becomes an ordinary UPLOADED asset for existing Groq/VAD/Gemini/artist authorization and Decimal royalty services. Generation never approves identity, compliance, financial charges or invoices. No comparison-only consent is upgraded. See [GEMINI_VOICE_WORKFLOW.md](GEMINI_VOICE_WORKFLOW.md) for retention, failure and verification limits.

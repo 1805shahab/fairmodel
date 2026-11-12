@@ -62,11 +62,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr);
   gap: 32px;
-  border-top: 2px solid #94ddff !important;
-  background: linear-gradient(110deg, #172539, #151d29) !important;
+  border-top: 2px solid var(--border) !important;
+  background: var(--surface);
 }
 .passport-cover svg {
-  color: #94ddff;
+  color: var(--ink);
   display: block;
   margin-bottom: 20px;
 }
@@ -87,22 +87,22 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  border: 1px solid #354154;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
 }
 .passport-lifecycle li {
   min-width: 0;
   padding: 20px 15px;
-  border-right: 1px solid #354154;
-  background: #121a26;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
 }
 .passport-lifecycle li:last-child {
   border-right: 0;
 }
 .passport-lifecycle li > span {
   display: block;
-  color: #91a2ba;
+  color: var(--ink);
   font: 11px monospace;
   margin-bottom: 16px;
 }
@@ -113,29 +113,29 @@
   line-height: 1.5;
 }
 .passport-lifecycle small {
-  color: #a8b8cb;
+  color: var(--ink);
   margin-top: 5px;
   text-transform: capitalize;
 }
 .passport-lifecycle p {
   font-size: 10px;
-  color: #aebdd0;
+  color: var(--ink);
   line-height: 1.6;
   overflow-wrap: anywhere;
   margin: 12px 0 0;
 }
 .passport-lifecycle li[data-state="complete"] {
-  border-top: 2px solid #8eddb8;
+  border-top: 2px solid var(--border);
 }
 .passport-lifecycle li[data-state="hold"] {
-  border-top: 2px solid #ffd19b;
+  border-top: 2px solid var(--border);
 }
 .passport-lifecycle li[data-state="simulated"] {
-  border-top: 2px solid #94ddff;
+  border-top: 2px solid var(--border);
 }
 .passport-lifecycle li[data-state="pending"],
 .passport-lifecycle li[data-state="included"] {
-  border-top: 2px solid #53637a;
+  border-top: 2px solid var(--border);
 }
 .passport-facts {
   display: grid;
@@ -146,10 +146,10 @@
 .passport-facts > div {
   min-width: 0;
   padding: 14px 0;
-  border-bottom: 1px solid #354154;
+  border-bottom: 1px solid var(--border);
 }
 .passport-facts dt {
-  color: #a6b2c4;
+  color: var(--ink);
   font-size: 12px;
   text-transform: capitalize;
   margin-bottom: 6px;
@@ -169,7 +169,7 @@
 }
 .passport-page details,
 .explorer-detail details {
-  border-top: 1px solid #354154;
+  border-top: 1px solid var(--border);
   padding: 14px 0;
   margin-top: 12px;
 }
@@ -177,7 +177,7 @@
 .explorer-detail summary {
   cursor: pointer;
   min-height: 32px;
-  color: #c8eaff;
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -189,9 +189,9 @@
   gap: 8px;
 }
 .passport-segments button {
-  border: 1px solid #354154;
-  background: #121a26;
-  color: #d9e5f2;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
   min-height: 44px;
   text-align: left;
   padding: 12px;
@@ -200,12 +200,12 @@
   border-radius: 5px;
 }
 .passport-segments button[aria-pressed="true"] {
-  border-color: #94ddff;
-  background: #1e3447;
+  border-color: var(--border);
+  background: var(--surface);
 }
 .passport-segments time {
   flex-shrink: 0;
-  color: #94ddff;
+  color: var(--ink);
   font: 12px monospace;
 }
 .passport-amount {
@@ -213,7 +213,7 @@
   letter-spacing: -2px;
   line-height: 1.1;
   margin: 24px 0 !important;
-  color: #b7e9ff;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .passport-audit,
@@ -225,13 +225,13 @@
   display: grid;
   grid-template-columns: 170px minmax(0, 1fr);
   gap: 24px;
-  border-top: 1px solid #354154;
+  border-top: 1px solid var(--border);
   padding: 20px 0;
 }
 .passport-audit time,
 .review-thread-events time {
   font: 11px/1.7 monospace;
-  color: #a6b2c4;
+  color: var(--ink);
 }
 .passport-audit strong {
   text-transform: capitalize;
@@ -261,7 +261,7 @@
   min-height: 56px;
   border: 1px solid transparent;
   background: transparent;
-  color: #c3d0df;
+  color: var(--ink);
   text-align: left;
   border-radius: 5px;
   cursor: pointer;
@@ -276,23 +276,23 @@
 }
 .explorer-list small {
   display: block;
-  color: #99aec3;
+  color: var(--ink);
   font-size: 10px;
   margin-top: 4px;
 }
 .explorer-list button[aria-pressed="true"] {
-  border-color: #608ca6;
-  background: #1b2f43;
-  color: #d5f2ff;
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--ink);
 }
 .explorer-list button:hover {
-  background: #1b293a;
+  background: var(--surface);
 }
 .explorer-detail {
   min-width: 0;
-  background: #101722;
+  background: var(--surface);
   padding: 24px;
-  border: 1px solid #354154;
+  border: 1px solid var(--border);
   border-radius: 6px;
   animation: evidence-in 160ms ease-out;
 }
@@ -308,12 +308,12 @@
   grid-template-columns: 1fr;
 }
 .explorer-detail blockquote {
-  border-left: 2px solid #94ddff;
+  border-left: 2px solid var(--border);
   padding-left: 16px;
   margin: 16px 0;
   font-size: 14px;
   line-height: 1.8;
-  color: #dbe6f2;
+  color: var(--ink);
 }
 .explorer-detail .evidence-list article {
   padding: 12px 0;
@@ -332,15 +332,15 @@
 .review-selected {
   margin: 20px 0;
   padding: 18px 0;
-  border-top: 1px solid #354154;
-  border-bottom: 1px solid #354154;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 .review-center-grid form {
   display: grid;
   gap: 16px;
 }
 .case-thread {
-  border-top: 1px solid #435167;
+  border-top: 1px solid var(--border);
   margin-top: 24px;
   padding-top: 24px;
 }
@@ -350,7 +350,7 @@
   flex-wrap: wrap;
 }
 .review-thread-events {
-  border-left: 1px solid #51647e;
+  border-left: 1px solid var(--border);
   margin: 24px 0;
   padding-left: 20px;
 }
@@ -376,9 +376,9 @@
   justify-items: start;
   text-align: left;
   padding: 16px;
-  background: #101722;
-  color: #dbe6f2;
-  border: 1px solid #354154;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
   border-radius: 5px;
   cursor: pointer;
 }
@@ -400,9 +400,9 @@
 }
 .duration-estimate input[type="number"] {
   background: transparent;
-  color: #b7e9ff;
+  color: var(--ink);
   border: 0;
-  border-bottom: 1px solid #51647e;
+  border-bottom: 1px solid var(--border);
   min-width: 0;
   width: 180px;
   font-size: 48px;
@@ -411,16 +411,16 @@
 .duration-estimate input[type="range"] {
   width: 100%;
   margin-top: 24px;
-  accent-color: #94ddff;
+  accent-color: var(--accent);
   min-height: 44px;
 }
 .duration-estimate span {
-  color: #a6b2c4;
+  color: var(--ink);
 }
 .estimate-result li {
   line-height: 1.8;
   font-size: 13px;
-  color: #b5c5d9;
+  color: var(--ink);
 }
 .provenance-filter {
   margin: 0 0 20px;
@@ -431,9 +431,9 @@
   min-width: 0;
   max-width: 100%;
   min-height: 44px;
-  background: #101722;
-  color: #edf2f8;
-  border: 1px solid #435167;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
   padding: 10px;
   border-radius: 5px;
 }
@@ -452,7 +452,7 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .passport-lifecycle li {
-    border-bottom: 1px solid #354154;
+    border-bottom: 1px solid var(--border);
   }
   .explorer-grid {
     grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.5fr);
@@ -533,7 +533,7 @@
   .workspace-stage,
   .workspace-stage .page-content {
     background: white !important;
-    color: #111 !important;
+    color: var(--ink);
     margin: 0 !important;
     padding: 0 !important;
     max-width: none !important;
@@ -556,8 +556,8 @@
   .explorer-detail,
   .passport-lifecycle li {
     background: white !important;
-    color: #111 !important;
-    border-color: #bbb !important;
+    color: var(--ink);
+    border-color: var(--border) !important;
     box-shadow: none !important;
     margin: 0 0 16px;
   }
@@ -580,7 +580,7 @@
       blockquote,
       pre
     ) {
-    color: #111 !important;
+    color: var(--ink);
     text-shadow: none !important;
   }
   .passport-page .page-heading {
@@ -593,7 +593,7 @@
   }
   .passport-lifecycle {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    border-color: #bbb;
+    border-color: var(--border);
   }
   .passport-page details > :not(summary) {
     display: block !important;

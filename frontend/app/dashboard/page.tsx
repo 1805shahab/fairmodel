@@ -1,4 +1,5 @@
 "use client";
+import { money } from "@/components/display-money";
 
 import Link from "next/link";
 import {
@@ -12,7 +13,7 @@ import {
 import { Badge, Empty, ErrorPanel, Loading, useData } from "@/components/ui";
 import VoiceSculpture from "@/components/voice-sculpture";
 import { useWorkspace } from "@/components/workspace";
-import { date, money } from "@/components/api";
+import { date } from "@/components/api";
 import type { Analytics, Asset, License, Invoice } from "@/components/types";
 
 export default function Dashboard() {
@@ -348,7 +349,9 @@ export default function Dashboard() {
                 <div>
                   <strong>{money(invoice.amount, invoice.currency)}</strong>
                   <span>
-                    {invoice.simulated ? "Local simulation" : "PayPal Sandbox"}{" "}
+                    {invoice.provider === "paypal_sandbox"
+                      ? "PayPal Sandbox (test funds)"
+                      : "Mock provider"}{" "}
                     · {invoice.recipient}
                   </span>
                 </div>

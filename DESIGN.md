@@ -1,5 +1,15 @@
 # FairModel product design
 
+## Current direction: recording-studio ledger — November 12
+
+Spacing refinement: page/header/footer share a 1440px content frame and responsive 48/32/24/16px gutters. Single forms use the available width, while studio generation pairs the form with bounded, keyboard-scrollable history on desktop when records exist; empty-history pages use the full-width form. The public five-stage explainer uses a native sticky scroll narrative with stable viewport space; click/keyboard navigation remains, and reduced-motion/short screens use a static compact view. Shared public and workspace footers use actual app directories and explicit demo/test labels.
+
+The latest owner brief supersedes the graphite/ice visual palette below. The frontend now uses warm paper, deep ink and restrained vermilion, with intentionally designed light/dark tokens, Instrument Serif display type, Geist UI type and JetBrains Mono financial figures. One top-navigation workspace, the existing role/context logic and all existing workflows remain. Historical CSS provides layout structure but references the shared semantic palette in `frontend/app/ledger-theme.css`, exposed through Tailwind configuration.
+
+Contract review pairs editable terms with verified source evidence, a mobile view switch and an explicit whole-version activation summary. Audio/compliance keeps processing, AI interpretation, deterministic evidence and artist decisions separate. AG Grid Community uses a ledger theme, a pinned exact amount column and a read-only detail dialog. Invoices visibly identify their provider and await confirmation until the backend reports settlement. The sculpture remains optional interactive art, with the required non-verification caption.
+
+370 backend tests, 33 browser tests, TypeScript/ESLint and production build pass. Both-theme axe scans, responsive/state captures and 1080p review artifacts are recorded in [the audit and verification report](docs/LEDGER_UI_REDESIGN.md). No backend, API contracts, provider integrations, environment configuration or runtime records were changed. Earlier palette directions are historical.
+
 ## Current direction: spatial voice-rights studio — November 11
 
 The owner explicitly rejected the previous retained sidebar, repeated light/teal dashboard and overly restrained motion. The visual direction below supersedes that treatment while retaining the same routes, data and safeguards. The primary app has no sidebar DOM: full-width module navigation and a Ctrl+K searchable page launcher replace it. The overview is an asymmetric composition with large editorial type, an interactive sculptural voice object, unboxed record counts, a review desk and an ivory financial panel. Recent submissions use actual saved records, not invented waveform/feed decoration.

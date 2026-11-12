@@ -13,7 +13,7 @@ import {
 } from "./ui";
 import { endpoint, api, post } from "./api";
 import { useWorkspace } from "./workspace";
-import type { License, Terms } from "./types";
+import type { Evidence, License, Terms } from "./types";
 import SourceCitations from "./source-citations";
 
 const lists: [keyof Terms, string][] = [
@@ -42,6 +42,8 @@ function Review({ license }: { license: License }) {
     [note, setNote] = useState(""),
     [ack, setAck] = useState(false);
   const { busy, error, run } = useAction();
+  const [view, setView] = useState("terms");
+  const [passage, setPassage] = useState<Evidence | null>(null);
   const active = license.status === "ACTIVE",
     editable = role === "artist" && !active;
   const update = <K extends keyof Terms>(key: K, value: Terms[K]) =>
@@ -81,36 +83,39 @@ function Review({ license }: { license: License }) {
       </div>
       {license.error && <ErrorPanel message={license.error} />}{" "}
       {editable && (
-        <section className="panel extraction-bar">
-          <div>
-            <h2>Contract intelligence</h2>
-            <p>
-              Run Gemini on your PDF or explicitly select the bundled demo
-              fixture.
-            </p>
-            <label className="checkbox">
-              <input
-                type="checkbox"
-                checked={demo}
-                onChange={(e) => setDemo(e.target.checked)}
-              />
-              Use local demo fixture — not a Gemini result
-            </label>
-          </div>
-          <BusyButton
-            busy={busy}
-            onClick={() =>
-              void run(async () => {
-                await post(`/licenses/${license.id}/extract`, {
-                  use_demo_fixture: demo,
-                });
-              }, "Extraction ready for your review.")
-            }
-          >
-            <Sparkles size={16} />
-            Extract terms
-          </BusyButton>
-        </section>
+        <details className="extraction-options" open={!license.terms.artist}>
+          <summary>Contract intelligence · extraction options</summary>
+          <section className="panel extraction-bar">
+            <div>
+              <h2>Contract intelligence</h2>
+              <p>
+                Run Gemini on your PDF or explicitly select the bundled demo
+                fixture.
+              </p>
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={demo}
+                  onChange={(e) => setDemo(e.target.checked)}
+                />
+                Use local demo fixture — not a Gemini result
+              </label>
+            </div>
+            <BusyButton
+              busy={busy}
+              onClick={() =>
+                void run(async () => {
+                  await post(`/licenses/${license.id}/extract`, {
+                    use_demo_fixture: demo,
+                  });
+                }, "Extraction ready for your review.")
+              }
+            >
+              <Sparkles size={16} />
+              Extract terms
+            </BusyButton>
+          </section>
+        </details>
       )}
       {demo && (
         <div className="alert warning">
@@ -125,7 +130,23 @@ function Review({ license }: { license: License }) {
           assigned studio submissions.
         </div>
       )}
-      <div className="review-grid">
+      <div className="terms-view-switch" aria-label="Contract review view">
+        <button
+          className="button secondary"
+          aria-pressed={view === "terms"}
+          onClick={() => setView("terms")}
+        >
+          Licensing terms
+        </button>
+        <button
+          className="button secondary"
+          aria-pressed={view === "source"}
+          onClick={() => setView("source")}
+        >
+          Contract source
+        </button>
+      </div>
+      <div className="review-grid" data-view={view}>
         <section className="panel form-panel">
           <div className="panel-heading inline">
             <div>
@@ -137,6 +158,17 @@ function Review({ license }: { license: License }) {
             </div>
             <Badge status={license.status} />
           </div>
+          {!active && (
+            <p className="alert info">
+              {license.extraction_provider.startsWith("gemini:")
+                ? "Extracted by AI. Please verify."
+                : license.extraction_provider.startsWith("demo")
+                  ? "Local fixture terms. Not an AI result. Please verify."
+                  : "Unapproved terms. Please verify the extraction source."}{" "}
+              An extracted value is not an approved term. Edit any incorrect
+              value, then save your review or activate the complete version.
+            </p>
+          )}
           {active ? (
             <ApprovedTerms terms={terms} />
           ) : (
@@ -290,6 +322,15 @@ function Review({ license }: { license: License }) {
           )}
           {editable && (
             <>
+              <div className="activation-summary">
+                <strong>Activate version {license.version}</strong>
+                <p>
+                  This makes the complete reviewed version available to the
+                  assigned studio. It does not authorize an asset, approve a
+                  charge or create an invoice. To withhold approval, save your
+                  corrections and leave this version in review.
+                </p>
+              </div>
               <Field
                 label="Review note"
                 hint="Required for edits and approval. Explain any manual corrections."
@@ -349,11 +390,34 @@ function Review({ license }: { license: License }) {
                 <p>Verified quotes from the uploaded PDF.</p>
               </div>
             </div>
+            {passage && (
+              <div
+                className="source-passage"
+                tabIndex={-1}
+                id="selected-source-passage"
+              >
+                <span className="eyebrow">
+                  Selected source · page {passage.page}
+                </span>
+                <p>
+                  <mark>{passage.quote}</mark>
+                </p>
+                <p className="small">
+                  Exact verified quotation from the uploaded agreement.
+                </p>
+              </div>
+            )}
             <details className="contract-citations" open={!active}>
               <summary>Supporting PDF clauses</summary>
               <SourceCitations
                 items={license.source_review?.citations || []}
                 licenseId={license.id}
+                onSelect={(item) => {
+                  setPassage(item);
+                  requestAnimationFrame(() =>
+                    document.getElementById("selected-source-passage")?.focus(),
+                  );
+                }}
               />
             </details>
             {license.source_review?.review_reasons.length ? (

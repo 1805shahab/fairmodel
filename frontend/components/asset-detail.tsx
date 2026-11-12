@@ -1,4 +1,6 @@
 "use client";
+import { money } from "./display-money";
+
 import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -19,7 +21,7 @@ import {
   useData,
 } from "./ui";
 import { useWorkspace } from "./workspace";
-import { api, money, post } from "./api";
+import { api, post } from "./api";
 import CampaignForm from "./campaign-form";
 import { Metric, Tabs, TabPanel } from "./product-ui";
 import SourceCitations from "./source-citations";
@@ -352,20 +354,6 @@ function Analysis({
         )}
       </TabPanel>
       <TabPanel group="recording" id="compliance" active={tab}>
-        {report && (
-          <EvidenceExplorer
-            report={report}
-            audio={result}
-            campaign={asset.campaign}
-            licenseId={asset.license_id}
-            onSeek={(seconds) => {
-              if (player.current) player.current.currentTime = seconds;
-              document
-                .getElementById("recording-player")
-                ?.scrollIntoView({ block: "center" });
-            }}
-          />
-        )}
         <div className="detail-toolbar">
           <button
             className="button secondary"
@@ -391,7 +379,7 @@ function Analysis({
             </div>
             <div className="report-body">
               {report.primary_reason && (
-                <p>
+                <p className="compliance-verdict">
                   <strong>Primary conclusion: </strong>
                   {report.primary_reason}
                 </p>
@@ -524,7 +512,50 @@ function Analysis({
                   </ul>
                 </section>
               </div>
+              {report.rule_checks?.some(
+                (rule) => rule.kind !== "administrative",
+              ) ? (
+                <details className="speech-details">
+                  <summary>Deterministic rules and workflow evidence</summary>
+                  <div className="evidence-list">
+                    {report.rule_checks
+                      .filter((rule) => rule.kind !== "administrative")
+                      .map((rule, index) => (
+                        <article key={index}>
+                          <strong>
+                            {rule.rule.replaceAll("_", " ")} ·{" "}
+                            {rule.outcome.replaceAll("_", " ")}
+                          </strong>
+                          {rule.kind && (
+                            <p className="small">
+                              Condition type: {rule.kind.replaceAll("_", " ")}
+                            </p>
+                          )}
+                          <p>{rule.explanation}</p>
+                          {rule.citations?.length ? (
+                            <details>
+                              <summary>Supporting rule clauses</summary>
+                              <SourceCitations
+                                items={rule.citations}
+                                licenseId={asset.license_id}
+                              />
+                            </details>
+                          ) : null}
+                        </article>
+                      ))}
+                  </div>
+                </details>
+              ) : null}
               <h3 className="report-section-title">AI content observations</h3>
+              <details className="speech-details">
+                <summary>Why am I seeing AI observations?</summary>
+                <p className="small">
+                  The AI interprets transcript content against approved
+                  restrictions. These observations are advisory. Licensing
+                  scope, workflow eligibility and royalty amounts are determined
+                  separately by rules and recorded human reviews.
+                </p>
+              </details>
               <p className="small">
                 Advisory transcript interpretation, separate from deterministic
                 scope and workflow checks.
@@ -566,31 +597,6 @@ function Analysis({
                   <p>{finding.explanation}</p>
                 </article>
               ))}
-              {report.rule_checks?.some(
-                (rule) => rule.kind !== "administrative",
-              ) ? (
-                <details className="speech-details">
-                  <summary>Deterministic rules and workflow evidence</summary>
-                  <div className="evidence-list">
-                    {report.rule_checks
-                      .filter((rule) => rule.kind !== "administrative")
-                      .map((rule, index) => (
-                        <article key={index}>
-                          <strong>
-                            {rule.rule.replaceAll("_", " ")} ·{" "}
-                            {rule.outcome.replaceAll("_", " ")}
-                          </strong>
-                          {rule.kind && (
-                            <p className="small">
-                              Condition type: {rule.kind.replaceAll("_", " ")}
-                            </p>
-                          )}
-                          <p>{rule.explanation}</p>
-                        </article>
-                      ))}
-                  </div>
-                </details>
-              ) : null}
               {report.overlap?.length ? (
                 <div
                   className={`alert ${report.billing_usage?.unresolved.length || report.billing_usage?.reconciliation_required ? "warning" : "info"}`}
@@ -648,6 +654,20 @@ function Analysis({
           </section>
         )}
 
+        {report && (
+          <EvidenceExplorer
+            report={report}
+            audio={result}
+            campaign={asset.campaign}
+            licenseId={asset.license_id}
+            onSeek={(seconds) => {
+              if (player.current) player.current.currentTime = seconds;
+              document
+                .getElementById("recording-player")
+                ?.scrollIntoView({ block: "center" });
+            }}
+          />
+        )}
         {!report && (
           <section className="panel compact-panel">
             <h2>Compliance pending</h2>

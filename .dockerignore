@@ -1,0 +1,26 @@
+# Allow only build inputs. Never send local secrets, databases or recordings.
+**
+!Dockerfile
+!backend/
+!backend/requirements.txt
+!backend/app/
+!backend/app/**
+!frontend/
+!frontend/**
+!postman/
+!postman/**
+!deploy/
+!deploy/render_start.py
+frontend/node_modules
+frontend/.next
+frontend/test-results
+frontend/playwright-report
+frontend/*.tsbuildinfo
+frontend/tests
+**/__pycache__
+**/.env
+**/.env.*
+**/*.db
+**/*.db-*
+**/*.sqlite*
+**/*.log

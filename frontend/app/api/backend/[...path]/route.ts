@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { hostedAccess } from "@/lib/hosted-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -7,6 +8,8 @@ async function forward(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
 ) {
+  const denied = hostedAccess(request);
+  if (denied) return denied;
   const { path } = await context.params;
   // Only fixed API paths on the configured local backend; never accept caller-supplied destinations.
   if (path.some((part) => !/^[a-zA-Z0-9_-]+$/.test(part))) {

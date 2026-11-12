@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import VoiceSculpture from "@/components/voice-sculpture";
 import ProductWalkthrough from "@/components/product-walkthrough";
+import ThemeToggle from "@/components/theme-toggle";
+import SiteFooter from "@/components/site-footer";
 
 // FairModel has one application. The former landing/preview fork is retired.
 export default function Home() {
@@ -26,6 +28,7 @@ export default function Home() {
         <a className="rights-nav-explore" href="#how-it-works">
           How it works
         </a>
+        <ThemeToggle />
         <Link className="button secondary" href="/dashboard">
           Open workspace <ArrowUpRight size={17} />
         </Link>
@@ -41,15 +44,11 @@ export default function Home() {
               VOICE LICENSING, WITH THE ARTIST IN CONTROL
             </span>
             <h1 id="rights-title">
-              Your voice.
-              <br />
-              Your <em>rights.</em>
-              <br />
-              Your royalties.
+              Your voice. Your <em>rights.</em> Your royalties.
             </h1>
             <p>
-              Turn permission into a clear path to payment. Review AI voice
-              usage against your terms, measure the speech, and approve every
+              AI voice licensing, from permission to payment. Review the terms,
+              measure the speech, and keep the artist in control of every
               charge.
             </p>
             <div className="rights-hero-actions">
@@ -132,13 +131,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="rights-footer">
-        <span>fairmodel. Every voice deserves a fair share.</span>
-        <Link href="/dashboard/settings">
-          Integrations & local access <ArrowUpRight size={14} />
-        </Link>
-        <span>Local role access · test payments only</span>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

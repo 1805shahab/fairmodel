@@ -1,6 +1,8 @@
 "use client";
+import { money } from "./display-money";
+
 import { useEffect, useState } from "react";
-import { api, money } from "./api";
+import { api } from "./api";
 import { Badge, ErrorPanel, Field, Loading, PageHeading, useData } from "./ui";
 import { useWorkspace } from "./workspace";
 import SourceCitations from "./source-citations";

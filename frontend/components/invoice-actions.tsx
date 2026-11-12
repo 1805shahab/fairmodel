@@ -22,6 +22,9 @@ export function PaymentModeNotice({ invoice }: { invoice?: Invoice | null }) {
         "Payment provider status unavailable. Check Demo & integrations before taking a payment action."
       ) : (
         <>
+          <span className="provider-badge">
+            {sandbox ? "PayPal Sandbox (test funds)" : "Mock provider"}
+          </span>{" "}
           {sandbox ? SANDBOX_NOTICE : PAYMENT_NOTICE}
           {!sandbox && (
             <small className="payment-clarification">

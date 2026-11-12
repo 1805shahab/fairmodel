@@ -27,6 +27,25 @@ export default function GenerateAdvertisement() {
         title="Generate advertisement"
         description="Select a provider and the artist’s permission, then generate your script. Audio analysis and artist review follow."
       />
+      <ol className="generation-journey" aria-label="Advertisement workflow">
+        <li aria-current="step">
+          <span>01</span>
+          <strong>Permission & script</strong>
+          <small>Select the artist’s grant and declare the campaign.</small>
+        </li>
+        <li>
+          <span>02</span>
+          <strong>Generate audio</strong>
+          <small>The selected provider processes one explicit request.</small>
+        </li>
+        <li>
+          <span>03</span>
+          <strong>Analyze & review</strong>
+          <small>
+            Measure speech, check compliance and obtain artist approval.
+          </small>
+        </li>
+      </ol>
       {role !== "studio" ? (
         <div className="alert info">
           <span>
@@ -122,204 +141,256 @@ function StudioGeneration() {
           grant generation for an approved license before you can generate.
         </div>
       )}
-      <form
-        className="panel form-panel"
-        aria-busy={busy}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void run(async () => {
-            const body = {
-              provider,
-              grant_id: grantId,
-              script,
-              campaign,
-              confirm_provider_use: confirmed,
-            };
-            const signature = JSON.stringify(body);
-            if (request.current?.signature !== signature)
-              request.current = { signature, key: crypto.randomUUID() };
-            try {
-              const job = await api<SpeechGeneration>("/generations", {
-                method: "POST",
-                body: JSON.stringify({
-                  ...body,
-                  request_key: request.current.key,
-                }),
-              });
-              if (job.status === "SUCCEEDED" && job.asset_id)
-                router.push(`/dashboard/submissions/${job.asset_id}`);
-              else
-                throw new Error(
-                  job.error ||
-                    "Generation is still running or was interrupted. Inspect its saved history; this request will not automatically run again.",
-                );
-            } finally {
-              jobs.retry();
-            }
-          }, "Generated audio saved. Run audio analysis and compliance on the recording page.");
-        }}
+      <div
+        className="generation-layout"
+        data-has-history={Boolean(jobs.data?.length)}
       >
-        <Field label="Voice generation provider">
-          <select
-            value={provider}
-            disabled={busy}
-            onChange={(e) => {
-              setProvider(e.target.value as "gemini" | "fish");
-              setGrantId("");
-              setConfirmed(false);
-              request.current = null;
-            }}
-          >
-            <option value="gemini">Google Gemini</option>
-            <option value="fish">
-              Fish Audio · s2.1-pro-free · inline cloning
-            </option>
-          </select>
-        </Field>
-        <Field label="Artist-approved voice and license">
-          <select
-            required
-            value={grantId}
-            onChange={(e) => setGrantId(e.target.value)}
-          >
-            <option value="">Choose a current artist grant</option>
-            {active.map((x) => (
-              <option key={x.id} value={x.id}>
-                {x.license_title} · v{x.license_version} · reference{" "}
-                {x.reference_id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field
-          label="Advertisement script"
-          hint="10–4,000 characters. The script is sent as text to Gemini. Output duration is measured after generation; text length does not set billable seconds."
+        <form
+          className="panel form-panel"
+          aria-busy={busy}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run(async () => {
+              const body = {
+                provider,
+                grant_id: grantId,
+                script,
+                campaign,
+                confirm_provider_use: confirmed,
+              };
+              const signature = JSON.stringify(body);
+              if (request.current?.signature !== signature)
+                request.current = { signature, key: crypto.randomUUID() };
+              try {
+                const job = await api<SpeechGeneration>("/generations", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    ...body,
+                    request_key: request.current.key,
+                  }),
+                });
+                if (job.status === "SUCCEEDED" && job.asset_id)
+                  router.push(`/dashboard/submissions/${job.asset_id}`);
+                else
+                  throw new Error(
+                    job.error ||
+                      "Generation is still running or was interrupted. Inspect its saved history; this request will not automatically run again.",
+                  );
+              } finally {
+                jobs.retry();
+              }
+            }, "Generated audio saved. Run audio analysis and compliance on the recording page.");
+          }}
         >
-          <textarea
-            required
-            minLength={10}
-            maxLength={4000}
-            rows={9}
-            value={script}
-            onChange={(e) => setScript(e.target.value)}
-            placeholder="Write an original advertisement permitted by the agreement."
-          />
-        </Field>
-        <CampaignForm value={campaign} onChange={setCampaign} />
-        {provider === "gemini" && available && (
-          <p className="small">
-            Voice replication: {available.replication_model}. Speech synthesis:{" "}
-            {available.model}. These configured models are not proof of provider
-            access. No model is substituted automatically after a rejection.
-          </p>
-        )}
-        {provider === "fish" && (
-          <p className="small">
-            Fish Audio · s2.1-pro-free only · inline reference cloning. No
-            reusable profile is created. Fair-use limits and provider retention
-            apply; no DPA or zero-retention guarantee. Identity is not
-            independently verified. There is no automatic provider/model
-            fallback.
-          </p>
-        )}
-        <label className="checkbox">
-          <input
-            required
-            type="checkbox"
-            checked={confirmed}
-            onChange={(e) => setConfirmed(e.target.checked)}
-          />
-          I request this {provider === "fish" ? "Fish Audio" : "Gemini"} voice
-          replication and speech-generation operation using the artist’s
-          provider-specific grant.{" "}
-          {provider === "fish"
-            ? "Only the documented free model is requested, subject to fair-use limits and provider terms."
-            : "It may consume paid API quota."}
-          This does not authorize a royalty invoice.
-        </label>
-        {error && <ErrorPanel message={error} />}
-        {busy && (
-          <p role="status">
-            The selected provider is processing the permitted inputs and
-            generating the advertisement. Keep this page open; do not start
-            another request.
-          </p>
-        )}
-        <div className="form-footer">
-          <BusyButton
-            busy={busy}
-            disabled={
-              !selectedProvider?.enabled ||
-              !selectedProvider.configured ||
-              !active.length
-            }
-          >
-            Generate with licensed artist voice
-          </BusyButton>
-          <button
-            className="button secondary"
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              request.current = null;
-            }}
-          >
-            Start a new generation request
-          </button>
-        </div>
-        <p className="small">
-          Retries reuse the same request key. A failed/interrupted request is
-          not automatically rerun; a new request is a separate provider
-          operation.
-        </p>
-      </form>
-      <section className="panel compact-panel">
-        <h2>Generation history</h2>
-        {jobs.error && <ErrorPanel message={jobs.error} retry={jobs.retry} />}
-        {!jobs.data?.length && (
-          <p className="muted">No generated advertisements yet.</p>
-        )}
-        {jobs.data?.map((job) => (
-          <article key={job.id} className="form-section-title">
-            <div>
-              <h3>
-                {job.status} · {date(job.created_at)}
-              </h3>
+          {busy && (
+            <div className="alert info" role="status" aria-live="polite">
+              <strong>Voice generation request in progress</strong>
               <p>
-                {job.receipt.service ||
-                  (job.provider === "fish"
-                    ? "Fish Audio request"
-                    : "Gemini TTS request")}
-                {job.receipt.succeeded_at && job.receipt.mode === "live"
-                  ? " · live response saved"
-                  : " · no successful result recorded"}
+                Waiting for the selected provider and local audio validation.
+                Analysis, compliance and authorization happen after the
+                recording is saved. Do not submit another request.
               </p>
-              {job.error && <p>{job.error}</p>}
-              {job.receipt.requested_replication_model && (
-                <p className="small">
-                  Requested replication:{" "}
-                  {job.receipt.requested_replication_model}. Requested
-                  synthesis: {job.receipt.requested_model}.
+            </div>
+          )}
+          <div
+            className="generation-preflight"
+            aria-label="Generation preparation"
+          >
+            <span className="eyebrow">BEFORE YOU GENERATE</span>
+            <dl>
+              <div>
+                <dt>Provider configuration</dt>
+                <dd>
+                  {selectedProvider?.enabled && selectedProvider.configured
+                    ? "Configured · access checked on request"
+                    : "Needs setup"}
+                </dd>
+              </div>
+              <div>
+                <dt>Artist grant</dt>
+                <dd>
+                  {active.find((grant) => grant.id === grantId)
+                    ? `Selected · license v${active.find((grant) => grant.id === grantId)?.license_version}`
+                    : "Select a current grant"}
+                </dd>
+              </div>
+              <div>
+                <dt>Campaign scope</dt>
+                <dd>Server validates approved terms before generation</dd>
+              </div>
+            </dl>
+            <p className="small">
+              Preparation is not a compliance decision. Spoken duration and
+              final licensing eligibility are assessed after generation.
+            </p>
+          </div>
+          <Field label="Voice generation provider">
+            <select
+              value={provider}
+              disabled={busy}
+              onChange={(e) => {
+                setProvider(e.target.value as "gemini" | "fish");
+                setGrantId("");
+                setConfirmed(false);
+                request.current = null;
+              }}
+            >
+              <option value="gemini">Google Gemini</option>
+              <option value="fish">
+                Fish Audio · s2.1-pro-free · inline cloning
+              </option>
+            </select>
+          </Field>
+          <Field label="Artist-approved voice and license">
+            <select
+              required
+              value={grantId}
+              onChange={(e) => setGrantId(e.target.value)}
+            >
+              <option value="">Choose a current artist grant</option>
+              {active.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.license_title} · v{x.license_version} · reference{" "}
+                  {x.reference_id.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field
+            label="Advertisement script"
+            hint={`10–4,000 characters. The script is sent to ${provider === "fish" ? "Fish Audio" : "Gemini"}. Output duration is measured after generation; text length does not set billable seconds.`}
+          >
+            <textarea
+              required
+              minLength={10}
+              maxLength={4000}
+              rows={9}
+              value={script}
+              onChange={(e) => setScript(e.target.value)}
+              placeholder="Write an original advertisement permitted by the agreement."
+            />
+          </Field>
+          <CampaignForm value={campaign} onChange={setCampaign} />
+          {provider === "gemini" && available && (
+            <p className="small">
+              Voice replication: {available.replication_model}. Speech
+              synthesis: {available.model}. These configured models are not
+              proof of provider access. No model is substituted automatically
+              after a rejection.
+            </p>
+          )}
+          {provider === "fish" && (
+            <p className="small">
+              Fish Audio · s2.1-pro-free only · inline reference cloning. No
+              reusable profile is created. Fair-use limits and provider
+              retention apply; no DPA or zero-retention guarantee. Identity is
+              not independently verified. There is no automatic provider/model
+              fallback.
+            </p>
+          )}
+          <label className="checkbox">
+            <input
+              required
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+            />
+            I request this {provider === "fish" ? "Fish Audio" : "Gemini"} voice
+            replication and speech-generation operation using the artist’s
+            provider-specific grant.{" "}
+            {provider === "fish"
+              ? "Only the documented free model is requested, subject to fair-use limits and provider terms."
+              : "It may consume paid API quota."}
+            This does not authorize a royalty invoice.
+          </label>
+          {error && <ErrorPanel message={error} />}
+          {busy && (
+            <p role="status">
+              The selected provider is processing the permitted inputs and
+              generating the advertisement. Keep this page open; do not start
+              another request.
+            </p>
+          )}
+          <div className="form-footer">
+            <BusyButton
+              busy={busy}
+              disabled={
+                !selectedProvider?.enabled ||
+                !selectedProvider.configured ||
+                !active.length
+              }
+            >
+              Generate with licensed artist voice
+            </BusyButton>
+            <button
+              className="button secondary"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                request.current = null;
+              }}
+            >
+              Start a new generation request
+            </button>
+          </div>
+          <p className="small">
+            Retries reuse the same request key. A failed/interrupted request is
+            not automatically rerun; a new request is a separate provider
+            operation.
+          </p>
+        </form>
+        <section
+          className="panel compact-panel"
+          aria-label="Generation history"
+          tabIndex={0}
+        >
+          <h2>Generation history</h2>
+          {jobs.error && <ErrorPanel message={jobs.error} retry={jobs.retry} />}
+          {!jobs.data?.length && (
+            <p className="muted">No generated advertisements yet.</p>
+          )}
+          {jobs.data?.map((job) => (
+            <article key={job.id} className="form-section-title">
+              <div>
+                <h3>
+                  {job.status} · {date(job.created_at)}
+                </h3>
+                <p>
+                  {job.receipt.service ||
+                    (job.provider === "fish"
+                      ? "Fish Audio request"
+                      : "Gemini TTS request")}
+                  {job.receipt.succeeded_at && job.receipt.mode === "live"
+                    ? " · live response saved"
+                    : " · no successful result recorded"}
                 </p>
-              )}
-              {job.receipt.requested_model &&
-                !job.receipt.requested_replication_model && (
+                {job.error && <p>{job.error}</p>}
+                {job.receipt.requested_replication_model && (
                   <p className="small">
-                    Requested model: {job.receipt.requested_model}.
+                    Requested replication:{" "}
+                    {job.receipt.requested_replication_model}. Requested
+                    synthesis: {job.receipt.requested_model}.
                   </p>
                 )}
-              {job.asset_id && (
-                <Link
-                  className="button secondary"
-                  href={`/dashboard/submissions/${job.asset_id}`}
-                >
-                  Open recording and analyze
-                </Link>
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
+                {job.receipt.requested_model &&
+                  !job.receipt.requested_replication_model && (
+                    <p className="small">
+                      Requested model: {job.receipt.requested_model}.
+                    </p>
+                  )}
+                {job.asset_id && (
+                  <Link
+                    className="button secondary"
+                    href={`/dashboard/submissions/${job.asset_id}`}
+                  >
+                    Open recording and analyze
+                  </Link>
+                )}
+              </div>
+            </article>
+          ))}
+        </section>
+      </div>
     </>
   );
 }

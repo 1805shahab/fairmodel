@@ -1,4 +1,6 @@
 "use client";
+import { money } from "@/components/display-money";
+
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
@@ -8,7 +10,7 @@ import {
   PageHeading,
   useData,
 } from "@/components/ui";
-import { money, statusLabel } from "@/components/api";
+import { statusLabel } from "@/components/api";
 import { PaymentModeNotice } from "@/components/invoice-actions";
 import type { Analytics } from "@/components/types";
 const Grid = dynamic(() => import("@/components/analytics-grid"), {

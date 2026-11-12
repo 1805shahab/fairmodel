@@ -4,6 +4,12 @@
 
 Source repository: [1805shahab/fairmodel](https://github.com/1805shahab/fairmodel) (private).
 
+**Render hosting:** [free deployment instructions](docs/RENDER_DEPLOYMENT.md). The prepared
+single-service Docker deployment is a password-protected **temporary demo**. Render
+Free erases SQLite/uploads on idle spin-down, restart or redeploy; it does not copy
+your Windows records. PayPal draft/send are blocked on that ephemeral host. Keep
+your durable local app for genuine payment evidence. Deployment is not yet live.
+
 Local full-stack hackathon application: Next.js App Router/React/TypeScript/Tailwind, FastAPI/Python 3.12, SQLAlchemy/SQLite, Gemini (`google-genai`), Groq Whisper, FFmpeg/ffprobe, WebRTC VAD, and AG Grid Community.
 
 Optional **Fish Audio `s2.1-pro-free`** voice generation now sits alongside Gemini, with separate artist consent and explicit studio provider selection. It uses inline reference audio, creates no reusable provider profiles and never switches to a paid model or another provider. Free access has fair-use limits and no DPA/verified zero-retention guarantee. See [setup, official-source findings and manually authorized live test](docs/FISH_AUDIO.md). Fish live generation remains unverified; normal tests use mocked HTTP and synthetic test recordings only.
@@ -59,6 +65,12 @@ APIMatic PayPal 0.4.1 supplies developer guidance; AG Grid Community powers the 
 Development and production builds explicitly use Webpack. Windows Application Control can block Next.js's native SWC compiler (`next-swc.win32-x64-msvc.node`), causing Next.js to load its WebAssembly fallback. Turbopack requires the native compiler; Webpack supports this fallback. The native-binding warning may still appear, while the application starts successfully. The first WebAssembly compilation can take longer than subsequent requests.
 
 Continue using `scripts/frontend.ps1` or `npm.cmd run dev`; both select Webpack automatically. `npm.cmd run build` also selects Webpack. See [Next.js CLI options](https://nextjs.org/docs/app/api-reference/cli/next) for the supported `--webpack` flags.
+
+## Recording-studio ledger interface
+
+The frontend uses warm paper, deep ink and restrained vermilion, with self-hosted Instrument Serif, Geist and JetBrains Mono. Page and footer content share centered responsive gutters. The homepage workflow advances through five stages on native scroll, while click/keyboard controls and a reduced-motion alternative remain available. Shared public/workspace footers link to actual application areas. Light/dark themes share one workspace and the same API-backed artist/studio workflows. Contract review keeps verified source quotations beside editable terms; mobile separates them into two views. Amounts display backend decimal text without frontend rounding. AG Grid Community retains sorting, filtering and CSV export, with a pinned amount column and read-only detail dialog.
+
+The Three.js sculpture is artwork only. Sandbox invoices remain labelled test funds; mock records remain simulations. Sending never confirms payment. /design-system shows the component/state reference. See [design audit, behavior boundaries and verification](docs/LEDGER_UI_REDESIGN.md).
 
 ## Fresh checkout setup
 

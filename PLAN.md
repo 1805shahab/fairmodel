@@ -1,3 +1,32 @@
+# Render Free deployment preparation — November 12, 2026
+
+- [x] Owner selected free-only hosting after persistent-disk limitation was explained. One Docker web service packages both apps; FastAPI stays loopback-only. No paid services, external resources or account operations created.
+- [x] Temporary SQLite/uploads are isolated under `/tmp/fairmodel`; original Windows records/files remain untouched and are excluded from the Docker context. No automatic data import. Visible cloud notice explains loss on idle/restart/redeploy.
+- [x] Shared hosted-demo password gate fails closed, guards API handlers as well as pages and blocks cross-site writes. It is not production authentication. Read-only `/healthz` checks both apps without providers.
+- [x] Free-host launcher enforces PayPal draft/send flags off because operation intents would be ephemeral. Mock remains explicit; real Sandbox financial demonstration stays in the durable local app. No live AI/payment request made.
+- [x] Fix root `tools/` ignore pattern so the existing credential-free Postman download route is included in Git; preserve the collection itself. Standalone output is Docker-only; local PowerShell commands remain unchanged.
+- [x] 384 Python tests (370 existing + 14 deployment), Ruff and hosted HTTP access/origin/health/Postman integration checks pass. TypeScript/ESLint, initial standalone build, final normal-output production build and all 38 Edge browser tests pass. No backend source or Postman collection changes. Owned isolated QA servers stopped; original runtime remains untouched.
+- [x] Owner explicitly authorized committing/pushing the latest UI and deployment source to the existing GitHub repository on November 12. Reviewed 66 changed/new source files: no private artifacts or known secret patterns; backend application/Postman collection unchanged. Publication result is verified separately against the remote commit.
+- [ ] Docker image build/runtime and actual Render deployment remain unverified: Docker engine is not running. Render login/service creation have not been performed. See docs/RENDER_DEPLOYMENT.md for exact free setup and limits.
+
+# Spacing, scroll walkthrough and shared footers — November 12, 2026
+
+- [x] Align header, content and footer with shared 1440px maximum width and responsive gutters; remove inconsistent single-form width caps; use the generation history as the right-hand column on wide screens.
+- [x] Homepage five-step walkthrough advances with native scrolling in a sticky scene. Keep click/keyboard selection; reduced motion and short screens use the compact static alternative. Reserve scene height to prevent copy-length changes clipping the final step.
+- [x] Shared professional footer: public directory and compact workspace version, actual route links, brand/tagline and explicit demo/test-environment labels. Print snapshots omit it.
+- [x] Focused seven browser checks pass; 370 backend tests pass; initial TypeScript/ESLint/build pass. Responsive screenshots at 375/768/1280/1920 show no overflow or browser errors, and landing axe scan has no violations.
+- [x] Full 37-case browser regression suite passes; final 18 targeted checks pass after mobile scene-height, empty/populated history and legacy overflow fixes. Final TypeScript/ESLint/22-page production build pass. All 60 protected files unchanged; no backend/env/live financial operation.
+
+# Frontend recording-studio ledger — November 12, 2026
+
+- [x] Audit existing frontend and protect 60 backend/API/provider/Postman files.
+- [x] Baseline: 370 backend tests, TypeScript/ESLint/production build and 28 Edge tests pass.
+- [x] Capture 63 baseline screenshots (21 views × 3 widths) against isolated fixture-only storage.
+- [x] Shared paper/ink/vermilion tokens, self-hosted fonts, theme choice and Radix page launcher.
+- [x] Contract source highlighting, activation summary, advisory explanations and exact backend money display.
+- [x] Both-theme axe AA checks and eight mocked Sandbox states pass; 63 responsive views and 24 extra states captured, with zero final overflow.
+- [x] Final: 370 backend tests, 33 Edge browser tests, TypeScript/ESLint and 22-page production build pass. All 60 protected source hashes unchanged; row detail/CSV send no backend writes. Gallery and five 1080p priority views saved under ignored .tmp/ledger-redesign; report: docs/LEDGER_UI_REDESIGN.md.
+
 # FairModel implementation plan
 
 ## Owner-created Sandbox draft reconciliation — November 11, 2026

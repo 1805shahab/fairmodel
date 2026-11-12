@@ -1,4 +1,6 @@
 "use client";
+import { money } from "@/components/display-money";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
@@ -18,7 +20,7 @@ import {
   useData,
 } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
-import { date, money, post } from "@/components/api";
+import { date, post } from "@/components/api";
 import type { Royalty } from "@/components/types";
 
 export default function Royalties() {

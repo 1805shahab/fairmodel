@@ -1,4 +1,6 @@
 "use client";
+import { money } from "@/components/display-money";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Send, RefreshCw, ExternalLink } from "lucide-react";
@@ -17,7 +19,7 @@ import {
   useData,
 } from "@/components/ui";
 import { useWorkspace } from "@/components/workspace";
-import { PAYMENT_NOTICE, date, money, post } from "@/components/api";
+import { PAYMENT_NOTICE, date, post } from "@/components/api";
 import type { Invoice, Royalty } from "@/components/types";
 
 export default function Invoices() {
@@ -164,6 +166,9 @@ function InvoiceCard({
               : "LOCAL SIMULATED INVOICE"}
           </span>
           <h2>{x.provider_id}</h2>
+          <span className="provider-badge">
+            {sandbox ? "PayPal Sandbox (test funds)" : "Mock provider"}
+          </span>
           <p>
             {date(x.created_at)} · Recipient: {x.recipient}
           </p>
@@ -293,6 +298,13 @@ function InvoiceCard({
             3 · {sandbox ? "Verified Sandbox settlement" : "Simulated paid"}
           </span>
         </div>
+        {sandbox && !["PAID", "CANCELLED", "REFUNDED"].includes(x.status) && (
+          <p className="payment-awaiting">
+            <strong>Awaiting payment confirmation</strong> · Sending an invoice
+            does not confirm payment. Refresh status to retrieve PayPal’s latest
+            evidence.
+          </p>
+        )}
         <div className="button-row">
           {role === "artist" && x.status === "DRAFT" && (
             <BusyButton

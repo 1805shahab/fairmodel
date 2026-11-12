@@ -30,11 +30,11 @@ test("file chooser rejects bad formats and drag-drop retains native validation",
   await page.goto("/dashboard/licenses/new");
   await expect(page.getByLabel("Agreement name", { exact: true })).toHaveCSS(
     "background-color",
-    "rgb(16, 23, 34)",
+    "rgb(255, 253, 249)",
   );
   await expect(page.getByLabel("Agreement name", { exact: true })).toHaveCSS(
     "color",
-    "rgb(237, 242, 248)",
+    "rgb(20, 19, 15)",
   );
   const chooser = page.getByLabel("Licensing agreement PDF", { exact: true });
   await chooser.setInputFiles({

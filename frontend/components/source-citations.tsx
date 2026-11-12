@@ -27,10 +27,12 @@ export default function SourceCitations({
   items,
   licenseId,
   requireVerified = true,
+  onSelect,
 }: {
   items: Evidence[];
   licenseId: string;
   requireVerified?: boolean;
+  onSelect?: (item: Evidence) => void;
 }) {
   const citations = visibleCitations(items, requireVerified);
   return (
@@ -42,6 +44,14 @@ export default function SourceCitations({
               {item.field.replaceAll("_", " ")} · PAGE {item.page}
             </span>
             <blockquote>{item.quote}</blockquote>
+            {onSelect && (
+              <button
+                className="button secondary small-button"
+                onClick={() => onSelect(item)}
+              >
+                Highlight source passage
+              </button>
+            )}
             {item.origin === "source_text_match" && (
               <p className="small">
                 Recovered by exact source-text matching; approved terms

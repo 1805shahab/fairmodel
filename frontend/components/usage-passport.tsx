@@ -1,9 +1,11 @@
 "use client";
+import { money } from "./display-money";
+
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Printer, ShieldCheck } from "lucide-react";
 import { useData, Badge, ErrorPanel, Loading, PageHeading } from "./ui";
-import { date, money } from "./api";
+import { date } from "./api";
 import type { Passport } from "./passport-types";
 import RecordingPlayer from "./recording-player";
 import EvidenceExplorer from "./evidence-explorer";

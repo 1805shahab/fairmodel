@@ -164,7 +164,12 @@ export default function VoiceSculpture() {
         )}
       </div>
       <p className="sculpture-disclosure">
-        Artwork only. Not a voiceprint, identity check or audio measurement.
+        <span>
+          Artistic rendering of this voice. Not verification evidence.
+        </span>
+        <span>
+          Artwork only. Not a voiceprint, identity check or audio measurement.
+        </span>
       </p>
     </div>
   );
